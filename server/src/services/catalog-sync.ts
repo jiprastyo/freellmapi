@@ -24,8 +24,10 @@ const MEDIA_MODALITIES = new Set(['image', 'audio']);
 /**
  * catalog-sync — keeps the local model catalog in step with the published one.
  *
- * Twice a day (and on demand) the server pulls the signed catalog from the
- * catalog service. A valid Premium license key (Bearer) gets the live tier,
+ * Every 2 hours (and on demand) the server pulls the signed catalog from the
+ * catalog service — the feed that says which free models are available, and
+ * free to be used by this install. A valid Premium license key (Bearer) gets
+ * the live tier,
  * refreshed every 2-3 days; everyone else gets the monthly snapshot — so free
  * installs still self-heal, just on a slower cadence. The response is verified
  * against a pinned Ed25519 public key over the exact bytes received; anything
@@ -52,7 +54,7 @@ MCowBQYDK2VwAyEAq9yv4+3EeyMHKsfVYBhkcz1lYgIXSUeHNnN6tNgYX3k=
 // migration lands, so the bundled DB is always the floor.
 export const MIN_CATALOG_VERSION = '2026.06.07';
 
-const SYNC_INTERVAL_MS = 12 * 60 * 60 * 1000; // twice daily
+const SYNC_INTERVAL_MS = 2 * 60 * 60 * 1000; // every 2 hours — keeps "free models available and free to be used" fresh
 const BOOT_DELAY_MS = 10 * 1000; // let the server settle before first sync
 const FETCH_TIMEOUT_MS = 20 * 1000;
 

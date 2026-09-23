@@ -41,7 +41,7 @@ describe('startCatalogSync / stopCatalogSync', () => {
     expect(after).toHaveLength(1);
     expect(after[0].ms).toBe(10 * 1000);
     expect(every).toHaveLength(1);
-    expect(every[0].ms).toBe(12 * 60 * 60 * 1000);
+    expect(every[0].ms).toBe(2 * 60 * 60 * 1000);
   });
 
   it('is idempotent — double-start registers only one set of jobs', () => {

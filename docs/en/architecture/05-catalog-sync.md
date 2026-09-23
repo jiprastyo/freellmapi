@@ -6,7 +6,7 @@
 
 ## 1. Overview
 
-The catalog sync keeps the local model catalog in step with the published catalog at `freellmapi.co`. It runs **twice daily** (and on demand), fetches a **signed catalog**, verifies it against a **pinned Ed25519 public key**, and applies it **transactionally** to the local SQLite database.
+The catalog sync keeps the local model catalog in step with the published catalog at `freellmapi.co` — the feed that says which free models are available, and free to be used by this install. It runs **every 2 hours** (and on demand), fetches a **signed catalog**, verifies it against a **pinned Ed25519 public key**, and applies it **transactionally** to the local SQLite database.
 
 ### Two Tiers
 
@@ -195,7 +195,7 @@ interface CatalogQuirk {
 startCatalogSync(scheduler: Scheduler)
   ├─ reapplyCachedCatalog()  // synchronous, no network
   ├─ scheduler.after(10s, run)  // boot delay
-  └─ scheduler.every(12h, run)  // twice daily
+  └─ scheduler.every(2h, run)  // every 2 hours
 ```
 
 - `run()` = `refreshLicenseStatus()` + `syncCatalog()`
