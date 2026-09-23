@@ -111,11 +111,15 @@ describe('syncOpencodeConfig (writes the free picker into opencode.json)', () =>
     expect(models['paid-model']).toBeUndefined();
 
     expect(models['free-usable'].name).toBe('Free Usable');
-    expect(models['free-usable'].limit).toEqual({ context: 131072 });
-    // vision=1 → image admitted; tools come from supports_tools.
-    expect(models['free-usable'].capabilities).toEqual({
-      tools: true, input: ['text', 'image'], output: ['text'],
+    // `limit` MUST carry both context and output — opencode's schema marks them
+    // required, and a partial limit makes it reject the whole provider.
+    expect(models['free-usable'].limit).toEqual({ context: 131072, output: 32000 });
+    // Legacy field names only: `capabilities` is not an allowed key here.
+    expect(models['free-usable'].tool_call).toBe(true);
+    expect(models['free-usable'].modalities).toEqual({
+      input: ['text', 'image'], output: ['text'],
     });
+    expect(models['free-usable'].capabilities).toBeUndefined();
   });
 
   it('drops a model from the picker once its platform stops being free', () => {
@@ -233,7 +237,43 @@ describe('syncOpencodeConfig (writes the free picker into opencode.json)', () =>
 
     expect(syncOpencodeConfig().written).toBe(true);
     const models = modelsOf(read());
-    expect(models['text-only'].capabilities.input).toEqual(['text']);
-    expect(models['sees-image'].capabilities.input).toEqual(['text', 'image']);
+    expect(models['text-only'].modalities.input).toEqual(['text']);
+    expect(models['sees-image'].modalities.input).toEqual(['text', 'image']);
+  });
+
+  it('every emitted entry satisfies opencode\'s own ProviderConfig schema', () => {
+    // Regression guard for a bug that shipped: emitting the V2 names
+    // (`capabilities`) and a partial `limit` made opencode reject the WHOLE
+    // provider ("skipped malformed recognized value") and the picker showed
+    // zero freellmapi models. These two rules are verbatim from
+    // https://opencode.ai/config.json → ProviderConfig.models.additionalProperties,
+    // which sets additionalProperties:false and required:["context","output"]
+    // on limit. `auto` is carried through verbatim, so it is covered too.
+    const ALLOWED = new Set([
+      'id', 'name', 'family', 'release_date', 'attachment', 'reasoning',
+      'temperature', 'tool_call', 'interleaved', 'cost', 'limit', 'modalities',
+      'experimental', 'status', 'provider', 'options', 'headers', 'variants',
+    ]);
+
+    process.env.OPENCODE_CONFIG_PATH = cfg;
+    write(SAMPLE_CONFIG);
+    addModel('groq', 'free-usable', 'Free Usable', 1, 1);
+    addKey('groq');
+
+    expect(syncOpencodeConfig().written).toBe(true);
+    const models = modelsOf(read());
+    expect(Object.keys(models).length).toBeGreaterThan(1);
+
+    for (const [id, entry] of Object.entries(models) as [string, Record<string, unknown>][]) {
+      const keys = Object.keys(entry);
+      const unknown = keys.filter(k => !ALLOWED.has(k));
+      expect(unknown, `model "${id}" has keys opencode will reject: ${unknown.join(', ')}`).toEqual([]);
+
+      if (entry.limit !== undefined) {
+        const limit = entry.limit as Record<string, unknown>;
+        expect(typeof limit.context, `model "${id}" limit.context`).toBe('number');
+        expect(typeof limit.output, `model "${id}" limit.output (required by schema)`).toBe('number');
+      }
+    }
   });
 });

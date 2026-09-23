@@ -64,11 +64,27 @@ export interface OpencodeSyncResult {
   count?: number;
 }
 
+// opencode's schema for this (legacy `provider`, not `providers`) block is
+// additionalProperties:false and only accepts the LEGACY model keys — see
+// https://opencode.ai/config.json → ProviderConfig.models.additionalProperties.
+// Two traps that were discovered the hard way by shipping the V2 names:
+//   - `capabilities` is not an allowed key at all;
+//   - `limit` declares required:["context","output"], so a partial limit is
+//     "malformed". Either one makes opencode reject the WHOLE provider
+//     (`kind=invalid action="skipped malformed recognized value"`) and the
+//     picker then shows zero models for it.
 interface ModelEntry {
   name?: string;
-  capabilities?: { tools: boolean; input: string[]; output: string[] };
-  limit?: { context: number };
+  tool_call?: boolean;
+  modalities?: { input: string[]; output: string[] };
+  limit?: { context: number; output: number };
 }
+
+// Nothing in this install knows a per-model output cap (there is no column for
+// it), and `limit.output` is mandatory above — so emit opencode's own documented
+// default for an unknown model rather than inventing 64k and provoking upstream
+// 400s on models that actually cap lower.
+const DEFAULT_OUTPUT_LIMIT = 32000;
 
 export function syncOpencodeConfig(): OpencodeSyncResult {
   const configPath = process.env.OPENCODE_CONFIG_PATH?.trim();
@@ -129,16 +145,13 @@ export function syncOpencodeConfig(): OpencodeSyncResult {
 
   for (const m of freeUsable) {
     const entry: ModelEntry = { name: m.name };
-    entry.capabilities = {
-      tools: m.supportsTools,
+    // Legacy names for what V2 calls capabilities.tools / capabilities.input.
+    entry.tool_call = m.supportsTools;
+    entry.modalities = {
       input: m.supportsVision ? ['text', 'image'] : ['text'],
       output: ['text'],
     };
-    // `limit.output` is deliberately absent: nothing in this install knows a
-    // per-model output cap (there is no column for it), and opencode merges
-    // partial limits — so it keeps its own default instead of us guessing 64k
-    // and provoking upstream 400s on models that cap lower. Context IS known.
-    if (m.contextWindow != null) entry.limit = { context: m.contextWindow };
+    if (m.contextWindow != null) entry.limit = { context: m.contextWindow, output: DEFAULT_OUTPUT_LIMIT };
     models[m.id] = entry;
   }
 
