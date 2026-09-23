@@ -16,6 +16,7 @@ import {
   reinstateUpstreamRetiredCatalogModel,
 } from './model-state.js';
 import { ensureAllModelsInProfiles } from './profile-models.js';
+import { syncOpencodeConfig } from '../lib/opencode-config.js';
 
 // Generative-media modalities are routed into the separate media_models table
 // (see services/media.ts), never into the chat `models` table.
@@ -849,7 +850,18 @@ export function startCatalogSync(scheduler: Scheduler): void {
   reapplyCachedCatalog();
   const run = () => {
     void refreshLicenseStatus();
-    void syncCatalog();
+    // syncCatalog never throws (it catches internally and returns a result), so
+    // the `.then` reliably fires on success, on "up to date" and on error — the
+    // opencode picker stays in step with whatever the catalog ended up being.
+    void syncCatalog().then(() => {
+      // opencode does not call GET /v1/models; its picker is whatever is
+      // hardcoded in opencode.json. Refresh that block on the same 2h cadence
+      // so "free models available and free to be used" reaches the picker too.
+      // No-op unless OPENCODE_CONFIG_PATH is set.
+      const res = syncOpencodeConfig();
+      if (res.written) console.log(`[catalog-sync] opencode picker refreshed (${res.count} free models)`);
+      else if (res.skipped) console.log(`[catalog-sync] opencode picker not written: ${res.skipped}`);
+    });
   };
   cancelBootTimer = scheduler.after(BOOT_DELAY_MS, run);
   cancelInterval = scheduler.every(SYNC_INTERVAL_MS, run);

@@ -388,13 +388,25 @@ export const openapiSpec = {
           'Lists the catalog, one row per model id, each tagged with whether it is usable right now, ' +
           'plus the virtual `auto` id. Content-negotiated: sending an `anthropic-version` header returns ' +
           'the Anthropic model-list shape; otherwise the OpenAI shape is returned. `?available=true` ' +
-          'filters to models that can serve a request now.',
+          'filters to models that can serve a request now. `?free=true` filters to platforms that are ' +
+          'free to use (no payment method), and omits the virtual router ids (`auto`, `fusion`, named ' +
+          'chains) since those could route to a paid model.',
         parameters: [
           {
             name: 'available',
             in: 'query',
             required: false,
             description: 'When `true`, return only models that are currently usable.',
+            schema: { type: 'boolean' },
+          },
+          {
+            name: 'free',
+            in: 'query',
+            required: false,
+            description: 'When `true`, return only models on free-to-use platforms (no payment method). '
+              + 'The virtual `auto`, `fusion` and `auto:<name>` router ids are omitted, as they could '
+              + 'dispatch to a paid platform. Combine with `available=true` for models that are both '
+              + 'free and currently usable.',
             schema: { type: 'boolean' },
           },
         ],

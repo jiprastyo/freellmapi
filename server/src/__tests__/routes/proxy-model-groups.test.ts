@@ -279,4 +279,44 @@ describe('Model unification (group the same model across providers)', () => {
     // The raw per-provider ids are never advertised anymore.
     expect(body.data.some((m: any) => m.id === 'tum-groq' || m.id === 'tum-cerebras')).toBe(false);
   });
+
+  // `?free=true` narrows /v1/models to platforms that are free to use (no card,
+  // recurring). See lib/free-platforms.ts. The hard part is the virtual router
+  // entries: `auto`/`fusion`/named chains can dispatch to ANY ranked model, a
+  // paid one included, so a free-only listing must omit them — otherwise the
+  // guarantee leaks. This asserts both the catalog filter and that omission.
+  it('?free=true lists only free-to-use platforms and drops the router entries', async () => {
+    // Free platform (groq) and paid platform (cohere), each with a distinct
+    // model, plus a shared display name that unifies them into one MIXED group.
+    addModel('groq', 'tum-free-only', 'Free Only Model', 3);
+    addModel('cohere', 'tum-paid-only', 'Paid Only Model', 4);
+    addModel('cohere', 'tum-cohere', 'Test Unify Model', 5);
+    addKey('cohere');
+
+    const all = await request(app, 'GET', '/v1/models', undefined, authHeaders());
+    expect(all.status).toBe(200);
+    // Default listing keeps the router entries and both the free and paid rows.
+    expect(all.body.data.some((m: any) => m.id === 'auto')).toBe(true);
+    expect(all.body.data.some((m: any) => m.id === 'free-only-model')).toBe(true);
+    expect(all.body.data.some((m: any) => m.id === 'paid-only-model')).toBe(true);
+    expect(all.body.data.some((m: any) => m.id === 'test-unify-model')).toBe(true);
+
+    const free = await request(app, 'GET', '/v1/models?free=true', undefined, authHeaders());
+    expect(free.status).toBe(200);
+    const ids = free.body.data.map((m: any) => m.id);
+
+    // Router entries are omitted: their target is not constrained to free
+    // platforms, so advertising them would let a client route to a paid model.
+    expect(ids).not.toContain('auto');
+    expect(ids).not.toContain('fusion');
+    expect(ids.some((id: string) => id.startsWith('auto:'))).toBe(false);
+
+    // The free-only model survives...
+    expect(ids).toContain('free-only-model');
+    // ...the paid-only model is gone...
+    expect(ids).not.toContain('paid-only-model');
+    // ...and the mixed groq+cohere group is gone too (a paid member could serve
+    // it, since the router is free to pick either).
+    expect(ids).not.toContain('test-unify-model');
+  });
 });

@@ -3,6 +3,7 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import type { ChatMessage, ChatToolCall, TokenUsage } from '@freellmapi/shared/types.js';
+import { isFreeToUseModel } from '../lib/free-platforms.js';
 import { type RouteResult, type ResolvedChain, type ChainRow, routeRequest, resolveRoutingChain, resolveModelGroupCandidates, resolveStickyPreference, hasEnabledVisionModel, hasEnabledToolsModel, routingReserveTokens } from '../services/router.js';
 import { secondsUntilNextMonth } from '../services/key-budget.js';
 import { runEmbeddings, EmbeddingsError } from '../services/embeddings.js';
@@ -331,7 +332,22 @@ proxyRouter.get('/models', (req: Request, res: Response) => {
 
   const q = String(req.query.available ?? req.query.connected ?? req.query.ready ?? '').toLowerCase();
   const onlyAvailable = q === '1' || q === 'true' || q === 'yes';
-  const listed = onlyAvailable ? allListed.filter(m => m.available === 1) : allListed;
+
+  // `?free=true` narrows the catalog to platforms that are free to use — no
+  // payment method, recurring allowance (see lib/free-platforms.ts). Opt-in so
+  // the default list is unchanged for clients that want everything.
+  //
+  // A model is kept only when EVERY platform that could serve it is free: under
+  // unify a group's `platforms` are its members (the router may dispatch to any
+  // of them), and under unify-off it is the single owning platform. Testing all
+  // platforms rather than `ownedBy` alone is what makes a group whose free and
+  // paid members are mixed fall out rather than leak a paid route through.
+  const fq = String(req.query.free ?? '').toLowerCase();
+  const onlyFree = fq === '1' || fq === 'true' || fq === 'yes';
+
+  const listed = allListed.filter(m =>
+    (!onlyAvailable || m.available === 1) &&
+    (!onlyFree || isFreeToUseModel(m)));
 
   // Named fallback chains (#960/#895): every user-defined profile is exposed
   // as an `auto:<name>` model so a client can pick a specific fallback chain
@@ -370,7 +386,7 @@ proxyRouter.get('/models', (req: Request, res: Response) => {
   // something can actually serve them, and never when the id would collide
   // with a real catalog row.
   const listedIds = new Set(listed.map(m => m.id));
-  const claudeFamilyEntries = allListed.some(m => m.available === 1)
+  const claudeFamilyEntries = (onlyFree ? false : allListed.some(m => m.available === 1))
     ? claudeFamilyDiscoveryEntries()
       .filter(a => !listedIds.has(a.id))
       .map(a => ({
@@ -400,9 +416,19 @@ proxyRouter.get('/models', (req: Request, res: Response) => {
   const es = esValues[String(req.query.execution_status ?? '').toLowerCase()];
   const esFiltered = es ? listed.filter(m => m.executionStatus === es) : listed;
 
+  // `?free=true` must drop the router entries (`auto`, `fusion`, the claude
+  // discovery aliases and the named `auto:<name>` chains), not just the catalog
+  // rows. Unlike `?available=`/`?execution_status=`, which only narrow real
+  // models, these virtual ids dispatch to WHATEVER the router ranks best — a
+  // paid platform included — so keeping them would defeat a free-only listing.
+  // Omitting `auto` entirely is deliberate: a client that only sees this list
+  // should not be able to select a route that can cost money.
+  const routerEntriesHidden = onlyFree;
+
   res.json({
     object: 'list',
     data: [
+      ...(routerEntriesHidden ? [] : [
       {
         id: AUTO_MODEL_ID,
         object: 'model',
@@ -441,6 +467,7 @@ proxyRouter.get('/models', (req: Request, res: Response) => {
         available: p.usable === 1,
         unavailable_reason: p.usable === 1 ? null : 'no_models',
       })),
+      ]),
       ...esFiltered.map(m => ({
         id: m.id,
         object: 'model',
