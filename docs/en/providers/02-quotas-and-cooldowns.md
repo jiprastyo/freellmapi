@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/providers/02-quotas-and-cooldowns.md)
 
 # Quotas, cooldowns, and key health
 

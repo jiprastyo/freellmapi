@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/troubleshooting/OVERVIEW.md)
 
 # Troubleshooting Domain — Overview & File Index
 

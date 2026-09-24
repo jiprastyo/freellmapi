@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/env/02-security-and-keys.md)
 
 # Security and key handling
 

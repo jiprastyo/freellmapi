@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/deployment/01-docker.md)
 
 # Docker
 

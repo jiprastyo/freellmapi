@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/architecture/06-observability.md)
 
 # Observability — Deep Dive
 

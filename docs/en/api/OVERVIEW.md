@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/api/OVERVIEW.md)
 
 # API Domain — Overview & File Index
 

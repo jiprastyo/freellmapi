@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/api/02-idempotency.md)
 
 # Idempotency-Key — Safe Retries for Non-Streaming Chat Completions
 

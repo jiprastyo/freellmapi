@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/compression/OVERVIEW.md)
 
 # Compression Domain
 
@@ -20,4 +19,3 @@ tool-output filters, and the statistics/preview APIs.
 
 - [../api/](../api/) — API reference showing `X-FreeLLM-Compress` response header.
 - [../clients/](../clients/) — Coding agents that benefit from automatic compression.
-- [../../zh-cn/compression/](../../zh-cn/compression/) — Simplified Chinese mirror (when translated).

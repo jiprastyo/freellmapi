@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/clients/01-agent-clients.md)
 
 # Clients & coding agents
 

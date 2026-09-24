@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/clients/OVERVIEW.md)
 
 # Clients Domain
 
@@ -20,4 +19,3 @@ feature for mid-conversation model switches.
 
 - [../api/](../api/) — OpenAI-compatible `/v1` and Anthropic Messages API reference.
 - [../compression/](../compression/) — Prompt compression that agents benefit from automatically.
-- [../../zh-cn/clients/](../../zh-cn/clients/) — Simplified Chinese mirror (when translated).

@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/glossary/01-glossary.md)
 
 # Glossary
 

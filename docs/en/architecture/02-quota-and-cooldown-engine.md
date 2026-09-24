@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/architecture/02-quota-and-cooldown-engine.md)
 
 # Quota & Cooldown Engine — Deep Dive
 

@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/architecture/05-catalog-sync.md)
 
 # Catalog Sync — Deep Dive
 

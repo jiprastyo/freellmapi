@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/troubleshooting/01-common-issues.md)
 
 # Common issues
 

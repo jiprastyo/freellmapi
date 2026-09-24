@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/providers/04-recurring-credit-gateways.md)
 
 # ElectronHub and Experiential Labs
 

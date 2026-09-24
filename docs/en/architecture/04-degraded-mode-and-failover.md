@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/architecture/04-degraded-mode-and-failover.md)
 
 # Degraded Mode & Failover — Deep Dive
 

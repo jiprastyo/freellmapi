@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/testing/03-compatibility-suite.md)
 
 # Compatibility suite
 

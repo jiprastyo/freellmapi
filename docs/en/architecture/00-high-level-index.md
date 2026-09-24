@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/architecture/00-high-level-index.md)
 
 # Architecture & internals
 

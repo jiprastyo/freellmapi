@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/architecture/03-streaming-pipeline.md)
 
 # Streaming Pipeline — Deep Dive
 

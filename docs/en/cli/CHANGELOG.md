@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/cli/CHANGELOG.md)
 
 # Changelog — cli
 

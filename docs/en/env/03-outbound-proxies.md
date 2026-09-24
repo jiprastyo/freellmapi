@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/env/03-outbound-proxies.md)
 
 # Outbound proxies
 

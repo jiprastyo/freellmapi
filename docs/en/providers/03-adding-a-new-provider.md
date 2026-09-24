@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/providers/03-adding-a-new-provider.md)
 
 # Adding a new provider
 

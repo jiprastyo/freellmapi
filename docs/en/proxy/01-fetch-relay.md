@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/proxy/01-fetch-relay.md)
 
 # Fetch Relay transport
 

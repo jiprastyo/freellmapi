@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/fallback/OVERVIEW.md)
 
 # Fallback Domain — Overview & File Index
 

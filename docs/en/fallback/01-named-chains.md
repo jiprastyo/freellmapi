@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/fallback/01-named-chains.md)
 
 # Named Fallback Chains
 

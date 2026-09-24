@@ -1,4 +1,3 @@
-**English** · [简体中文](../zh-cn/CHANGELOG.md)
 
 # Changelog — en
 

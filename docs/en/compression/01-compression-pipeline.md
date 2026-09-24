@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/compression/01-compression-pipeline.md)
 
 # Prompt compression
 

@@ -46,10 +46,8 @@ npm run db:migration:down
 
 ## Translations
 
-The dashboard ships 60 locales. `en.json` is the source of truth and every other file mirrors
-its keys, so run `npm run check:i18n` from `client/` before opening a PR. See
-[docs/TRANSLATION.md](docs/TRANSLATION.md) for the full rules and the settled Chinese
-terminology.
+The dashboard ships 60 UI locales. `en.json` is the source of truth and every other file mirrors
+its keys, so run `npm run check:i18n` from `client/` before opening a PR.
 
 ## Commit checklist hook
 

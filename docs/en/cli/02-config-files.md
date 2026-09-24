@@ -1,4 +1,3 @@
-**English** · [简体中文](../../zh-cn/cli/02-config-files.md)
 
 # Config files
 
