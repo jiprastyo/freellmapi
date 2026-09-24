@@ -37,7 +37,7 @@ npm run test -w client            # vitest run && npm run check:i18n
 npm run check:i18n -w client      # scripts/check-i18n.mjs
 ```
 
-`check:i18n` verifies every locale file for key/placeholder parity; a missing or placeholder-broken translation fails the suite, not just the build.
+`check:i18n` validates the English UI dictionary (`client/src/i18n/locales/en.json`): it must parse, and its keys are what every literal `t('…')` call resolves against.
 
 ### Everything else
 

@@ -130,7 +130,7 @@ const DAY = 24 * HOUR
 
 /**
  * Coarse "how long ago" for a sidebar row, as an i18n key plus its count —
- * formatting stays in the component so every locale writes its own phrasing.
+ * formatting stays in the component so the caller writes its own phrasing.
  * Anything under a minute (a clock skewed into the future included) is "just
  * now"; beyond that it steps minutes → hours → days and stops, because a
  * conversation from last March does not need its own unit.

@@ -26,9 +26,9 @@ const onAddKey = vi.fn()
 
 beforeEach(() => {
   ;(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true
-  // Some jsdom builds here expose no window.localStorage; I18nProvider reads
-  // it during detectLocale. A tiny in-memory stand-in keeps the test about
-  // the links, not the environment.
+  // Some jsdom builds here expose no window.localStorage; dashboard code may
+  // touch it. A tiny in-memory stand-in keeps the test about the links, not
+  // the environment.
   if (typeof window !== 'undefined' && !window.localStorage) {
     const store = new Map<string, string>()
     Object.defineProperty(window, 'localStorage', {

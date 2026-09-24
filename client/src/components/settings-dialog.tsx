@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import {
   AlertTriangle,
   ArrowRight,
   Check,
   CheckCircle2,
-  ChevronsUpDown,
   ExternalLink,
   FlaskConical,
   Gauge,
@@ -13,7 +12,6 @@ import {
   Monitor,
   Moon,
   RefreshCw,
-  Search,
   SlidersHorizontal,
   Sparkles,
   SquareTerminal,
@@ -27,18 +25,17 @@ import {
   DialogPopup,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { UPDATE_CHECK_CHANGED_EVENT } from '@/components/update-reminder'
 import { Switch } from '@/components/ui/switch'
 import { Tooltip } from '@/components/tooltip'
-import { SUPPORTED_LOCALES, type Locale, useI18n } from '@/i18n'
+import { type Locale, useI18n } from '@/i18n'
 import { type Theme, useTheme } from '@/theme-context'
 import { apiFetch } from '@/lib/api'
 
 // Small info affordance used next to labels a first-time user can't be expected
 // to understand. It's a real <button> so it reaches the tooltip by keyboard
 // (the shared Tooltip opens on focus as well as hover); self-evident settings
-// like language and theme deliberately have none.
+// like the theme deliberately have none.
 function InfoHint({ text }: { text: string }) {
   return (
     <Tooltip text={text}>
@@ -133,114 +130,6 @@ function OptionBar<T extends string>({
         )
       })}
     </div>
-  )
-}
-
-function LanguageCombobox() {
-  const { locale, setLocale, t } = useI18n()
-  const [open, setOpen] = useState(false)
-  const [query, setQuery] = useState('')
-  const [active, setActive] = useState(0)
-
-  const languages = useMemo(() => {
-    const collator = new Intl.Collator(locale, { sensitivity: 'base' })
-    return SUPPORTED_LOCALES
-      .map(code => ({ code, name: t(`languages.${code}`) }))
-      .sort((a, b) => collator.compare(a.name, b.name))
-  }, [locale, t])
-
-  const normalizedQuery = query.trim().toLocaleLowerCase(locale)
-  const filtered = normalizedQuery
-    ? languages.filter(({ code, name }) =>
-        `${name} ${code}`.toLocaleLowerCase(locale).includes(normalizedQuery),
-      )
-    : languages
-  const currentName = languages.find(language => language.code === locale)?.name ?? locale
-
-  function selectLocale(next: Locale) {
-    setLocale(next)
-    setOpen(false)
-    setQuery('')
-  }
-
-  function onKeyDown(event: React.KeyboardEvent) {
-    if (event.key === 'ArrowDown') {
-      event.preventDefault()
-      setActive(current => Math.min(current + 1, filtered.length - 1))
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault()
-      setActive(current => Math.max(current - 1, 0))
-    } else if (event.key === 'Enter' && filtered[active]) {
-      event.preventDefault()
-      selectLocale(filtered[active].code)
-    }
-  }
-
-  return (
-    <Popover
-      open={open}
-      onOpenChange={nextOpen => {
-        setOpen(nextOpen)
-        setQuery('')
-        setActive(0)
-      }}
-    >
-      <PopoverTrigger
-        aria-label={t('settings.language')}
-        className="flex h-9 w-full items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-3 text-sm outline-none transition-colors hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:w-64 dark:bg-input/30"
-      >
-        <span className="truncate">{currentName}</span>
-        <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-[min(340px,calc(100vw-3rem))] p-0" onKeyDown={onKeyDown}>
-        <div className="flex items-center gap-2 border-b px-3">
-          <Search className="size-4 shrink-0 text-muted-foreground" />
-          <input
-            autoFocus
-            value={query}
-            onChange={event => {
-              setQuery(event.target.value)
-              setActive(0)
-            }}
-            placeholder={t('settings.searchLanguage')}
-            aria-label={t('settings.searchLanguage')}
-            role="combobox"
-            aria-expanded="true"
-            aria-controls="settings-language-list"
-            aria-activedescendant={filtered[active] ? `settings-language-${filtered[active].code}` : undefined}
-            className="h-10 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-          />
-        </div>
-        <div id="settings-language-list" role="listbox" className="max-h-72 overflow-y-auto p-1">
-          {filtered.length === 0 ? (
-            <p className="px-3 py-8 text-center text-sm text-muted-foreground">
-              {t('settings.noLanguages')}
-            </p>
-          ) : (
-            filtered.map((language, index) => (
-              <button
-                key={language.code}
-                id={`settings-language-${language.code}`}
-                type="button"
-                role="option"
-                aria-selected={language.code === locale}
-                onMouseEnter={() => setActive(index)}
-                onClick={() => selectLocale(language.code)}
-                className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-start text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
-                  language.code === locale ? 'bg-accent/50' : index === active ? 'bg-muted' : ''
-                }`}
-              >
-                <Check className={`size-4 shrink-0 ${language.code === locale ? 'opacity-100' : 'opacity-0'}`} />
-                <span className="min-w-0 flex-1 truncate">{language.name}</span>
-                <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
-                  {language.code}
-                </span>
-              </button>
-            ))
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
   )
 }
 
@@ -562,7 +451,6 @@ function GeneralSection({ active }: { active: boolean }) {
   return (
     <>
       <SectionHeader title={t('settings.sectionGeneral')} description={t('settings.generalDescription')} />
-      <Row label={t('settings.language')} control={<LanguageCombobox />} />
       <Row
         label={t('settings.theme')}
         control={(
@@ -635,10 +523,9 @@ function formatDateTime(value: string | null | undefined, locale: Locale) {
  * whether official `main` has moved past it (#491).
  *
  * The collapsed row is deliberately wordless, as the version row it replaces was
- * (#703): a proper noun, a version number, an arrow and icons, so it reads the
- * same in all 60 shipped locales. Words only appear behind the button, in the
- * dialog, where the commits and the deployment-specific upgrade command are —
- * and those strings are translated.
+ * (#703): a proper noun, a version number, an arrow and icons. Words only
+ * appear behind the button, in the dialog, where the commits and the
+ * deployment-specific upgrade command are.
  *
  * Comparison happens on the server, against the local commit rather than a
  * release tag, so a source or container install that tracks `main` gets a true

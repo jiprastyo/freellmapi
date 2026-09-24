@@ -9,9 +9,8 @@ import { describe, expect, it } from 'vitest'
 // the default preset — so no model is ever excluded from routing, and custom
 // models are deliberately seeded at the catalog median tier so they route
 // (custom-model-seed.ts, #488). The reworded tooltip drops the score claim
-// entirely, which is also what makes a stale locale detectable here: every
-// pre-#891 translation carried that literal "0" and none of the current ones
-// do. The first fix shipped in six locales only; these tests hold all 60.
+// entirely, which is also what makes a stale string detectable here: the
+// pre-#891 wording carried that literal "0" and none of the current ones do.
 const here = path.dirname(fileURLToPath(import.meta.url))
 const localeDir = path.join(here, '../i18n/locales')
 const scoring = readFileSync(
@@ -29,8 +28,6 @@ function models(locale: string): Record<string, string> {
 const locales = readdirSync(localeDir)
   .filter(name => name.endsWith('.json'))
   .map(name => name.slice(0, -5))
-
-const english = models('en')
 
 describe('capability-tier hint', () => {
   it('leaves intelligence as one weighted axis, not a routing veto', () => {
@@ -55,22 +52,13 @@ describe('capability-tier hint', () => {
     }
   })
 
-  it('translates both strings in every locale, distinct from the English source', () => {
-    expect(locales.length).toBeGreaterThan(50)
+  it('ships both strings, distinct from each other', () => {
     for (const locale of locales) {
       const strings = models(locale)
       for (const key of KEYS) {
-        const value = strings[key]
-        expect(value, `${locale}.${key}`).toBeTruthy()
-        // The tier names stay in Latin in every locale — they are the values
-        // the picker shows — so an untranslated string is not merely "contains
-        // English", it is byte-identical to en.json.
-        if (locale !== 'en') {
-          expect(value, `${locale}.${key} is still the English string`)
-            .not.toBe(english[key])
-        }
+        expect(strings[key], `${locale}.${key}`).toBeTruthy()
       }
-      // The hint explains the axis; the placeholder names one option. A locale
+      // The hint explains the axis; the placeholder names one option. A string
       // that pasted one into the other explains nothing.
       expect(strings.sizeLabelHint, `${locale} reuses one string for both`)
         .not.toBe(strings.sizeLabelNone)

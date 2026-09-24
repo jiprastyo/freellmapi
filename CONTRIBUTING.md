@@ -44,11 +44,6 @@ npm run db:migration:up
 npm run db:migration:down
 ```
 
-## Translations
-
-The dashboard ships 60 UI locales. `en.json` is the source of truth and every other file mirrors
-its keys, so run `npm run check:i18n` from `client/` before opening a PR.
-
 ## Commit checklist hook
 
 Optional, and off by default. If you use [Claude Code](https://claude.com/claude-code), the repo

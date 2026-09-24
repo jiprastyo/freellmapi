@@ -27,7 +27,7 @@ describe('agent card descriptions', () => {
       expect(english[tool.id], tool.id).toBeTruthy()
     }
     // No orphans either: a description for an id no longer in the catalog is
-    // dead copy every locale has to carry.
+    // dead copy the dictionary has to carry.
     expect(Object.keys(english).sort()).toEqual(catalog.map(tool => tool.id).sort())
   })
 
@@ -39,14 +39,10 @@ describe('agent card descriptions', () => {
     expect(english.crush).not.toMatch(/VS Code/)
   })
 
-  it('carries the same description ids in all 60 locales', () => {
-    const expected = Object.keys(descriptions('en')).sort()
+  it('ships exactly one locale dictionary', () => {
     const locales = readdirSync(localeDir)
       .filter(name => name.endsWith('.json'))
       .map(name => name.slice(0, -5))
-    expect(locales.length).toBe(60)
-    for (const locale of locales) {
-      expect(Object.keys(descriptions(locale)).sort(), locale).toEqual(expected)
-    }
+    expect(locales).toEqual(['en'])
   })
 })

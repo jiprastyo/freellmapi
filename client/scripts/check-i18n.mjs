@@ -6,14 +6,7 @@ const localeDirectory = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '../src/i18n/locales',
 )
-const expectedLocales = [
-  'en', 'zh-CN', 'es', 'fr', 'pt-BR', 'it', 'hi', 'ar', 'bn', 'ru',
-  'ur', 'id', 'de', 'ja', 'sw', 'mr', 'te', 'tr', 'ta', 'vi',
-  'ko', 'fa', 'th', 'gu', 'pl', 'uk', 'kn', 'ml', 'or', 'my',
-  'pa', 'ro', 'nl', 'ms', 'tl', 'ha', 'yo', 'ig', 'am', 'uz',
-  'az', 'si', 'ne', 'km', 'el', 'cs', 'hu', 'sv', 'he', 'da',
-  'fi', 'no', 'sk', 'bg', 'hr', 'sr', 'lt', 'zh-TW', 'pt-PT', 'ka',
-]
+const expectedLocales = ['en']
 
 function flatten(value, prefix = '', output = new Map()) {
   if (value && typeof value === 'object' && !Array.isArray(value)) {

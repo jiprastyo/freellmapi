@@ -33,8 +33,7 @@ describe('rate-limit field hints', () => {
     expect(source).not.toContain("t('models.limitHint')")
   })
 
-  it('translates all four hints in every locale, and keeps them distinct', () => {
-    expect(locales.length).toBeGreaterThan(50)
+  it('translates all four hints, and keeps them distinct', () => {
     for (const locale of locales) {
       const strings = models(locale)
       const values = FIELDS.map(field => strings[`limit${field}Hint`])
