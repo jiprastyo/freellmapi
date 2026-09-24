@@ -199,6 +199,12 @@ curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-
 hermes -z "Say hello"
 ```
 
+From a source checkout, run `npm install && npm run build -w cli` at the repo
+root first — a missing build makes npx fail with `sh: freellmapi: command not
+found`. In the TUI the gateway is the default model, shown as
+`custom/<model-id>`; `/model custom:<model-id>` picks another catalog id, and
+`--model <id>` pins it in `config.yaml`.
+
 A running `hermes gateway` needs a restart to pick the change up.
 `--profile <name>` adds a `providers.freellmapi-<name>` entry instead —
 picked inside a chat with `/model custom:freellmapi-<name>:auto` — and leaves

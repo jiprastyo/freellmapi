@@ -92,6 +92,7 @@ curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-
 hermes -z "Say hello"
 ```
 
+在源码检出中运行时，先在仓库根目录执行 `npm install && npm run build -w cli`——否则 npx 会报 `sh: freellmapi: command not found`。在 TUI 中该网关就是默认模型，显示为 `custom/<model-id>`；用 `/model custom:<model-id>` 切换目录中的其他模型，`--model <id>` 则把它固定进 `config.yaml`。
 正在运行的 `hermes gateway` 需要重启才会读到变更。`--profile <name>` 改为添加 `providers.freellmapi-<name>` 条目——在对话里用 `/model custom:freellmapi-<name>:auto` 选择——不改动默认模型；`--model <id>` 固定默认模型。Hermes 对自定义端点只发送 SDK 的通用 User-Agent，所以该块带有 `default_headers: { User-Agent: hermes-agent }`，Agents 页面的"最近出现"徽章据此识别。设置了 `HERMES_HOME` 时会被尊重。
 
 ### QwenPaw

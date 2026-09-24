@@ -11,6 +11,13 @@ npx freellmapi setup-claude --url http://localhost:3001 --api-key <your-key>
 No install step, no account. The unified API key comes from your FreeLLMAPI
 dashboard.
 
+From a source checkout, link and build the workspace first — otherwise npx
+fails with `sh: freellmapi: command not found`:
+
+```bash
+npm install && npm run build -w cli   # at the repo root
+```
+
 ## Commands
 
 | Command | Tool |
