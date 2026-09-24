@@ -142,6 +142,34 @@ default is the wrong failure mode for a file that carries credentials.
 ## Status
 
 - [x] Review complete (2026-09-24)
-- [x] Fixes implemented — see commit history after `742b7d6`
-- [x] All tests + tsc + eslint green after fixes
-- [x] Live re-verified: picker still lists 22 entries, server healthy
+- [x] Fixes implemented — commit `47653c1`
+- [x] All tests + tsc + eslint green after fixes (**full suite: 289 files, 3470 passed, 0 failed**)
+- [x] Live re-verified: picker still lists 22 entries, server healthy (pid 51400), dedup rail
+      correctly skipped an unnecessary rewrite on boot
+
+### Fix details (as shipped)
+
+All five findings were fixed in commit `47653c1`:
+
+- **F1** — `catalog-sync.ts`: the `syncOpencodeConfig()` call is wrapped in try/catch inside the
+  `.then()`, and the chain now ends in `.catch()`. A DB failure logs
+  `[catalog-sync] opencode picker refresh crashed: …` and costs one refresh, never the process.
+  Regression test: a mocked throw inside the hook must produce **zero unhandled rejections**.
+- **F2** — `opencode-config.ts`: provider lookup is now
+  `Object.prototype.hasOwnProperty.call(providers, providerId)`. Test: `OPENCODE_PROVIDER_ID='__proto__'`
+  skips with `provider "__proto__" not present in config`, file untouched.
+- **F3** — `opencode-config.ts`: `UNSAFE_IDS = {'__proto__','constructor','prototype'}` + `auto`
+  are never emitted; `written` counts only safe entries. IMPORTANT: model ids are
+  **slugs of display names** (`slugifyGroupLabel`), so the realistic attack is a catalog model
+  *displayed as "Auto"* — that slug is exactly `auto`. Tests prove a catalog "Auto" cannot
+  overwrite the user's verbatim `auto` entry, and "Constructor" is dropped.
+- **F4** — `opencode-config.ts`: `fs.rmSync(tmp, { force: true })` in the write catch path.
+- **F5** — `opencode-config.ts`: non-object `models` block skips with
+  `provider "models" block is not an object — left untouched`.
+
+Bonus finding from the full-suite run: the repo's module-purity guard flagged that
+`free-platforms.ts` was never registered — added to `PURE_MODULES` so its purity
+(type-only imports) is now an enforced invariant.
+
+Review-to-fix loop converged: after the fixes, the 5-file focused suite is 50/50 and the full
+3475-test suite is 3470 passed / 5 skipped / 0 failed.
