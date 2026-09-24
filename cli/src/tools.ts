@@ -772,9 +772,11 @@ function openclaw(ctx: GenerateContext): Generation {
 // endpoint: OPENAI_BASE_URL is deliberately ignored for anything but
 // api.openai.com, and OPENAI_API_KEY is only sent to OpenAI hosts. So the
 // gateway goes into the `model` block as `provider: custom` with `base_url`,
-// and the key travels as `api_key: "${FREELLMAPI_API_KEY}"` — Hermes's own
-// substitution — with the value in $HERMES_HOME/.env (0600), the file Hermes
-// loads on its own, so nothing needs exporting. A fresh install ships
+// and the key goes in literally as `api_key` — Hermes documents a literal
+// there, while its `${VAR}` form expands only from the process environment
+// at config load, never from $HERMES_HOME/.env alone, so a placeholder would
+// travel verbatim and earn a 401. The file is marked sensitive so it is
+// written 0600. A fresh install ships
 // `model: ""` (a "not configured" sentinel); replacing it with the mapping is
 // exactly what `hermes setup` would do, and it is what lets a headless first
 // run skip the wizard. A named profile becomes an entry in the `providers`
@@ -794,7 +796,7 @@ function hermes(ctx: GenerateContext): Generation {
         provider: 'custom',
         default: model.id,
         base_url: v1Url(ctx.url),
-        api_key: '${FREELLMAPI_API_KEY}',
+        api_key: ctx.apiKey,
         api_mode: 'chat_completions',
         context_length: contextWindow(model),
         default_headers: headers,
@@ -809,7 +811,7 @@ function hermes(ctx: GenerateContext): Generation {
         [provider]: {
           name: `FreeLLMAPI (${ctx.profile})`,
           api: v1Url(ctx.url),
-          api_key: '${FREELLMAPI_API_KEY}',
+          api_key: ctx.apiKey,
           transport: 'chat_completions',
           default_model: model.id,
           context_length: contextWindow(model),
@@ -819,13 +821,7 @@ function hermes(ctx: GenerateContext): Generation {
     };
   return {
     files: [
-      { path: path.join(home, 'config.yaml'), format: 'yaml', value },
-      {
-        path: path.join(home, '.env'),
-        format: 'env',
-        sensitive: true,
-        content: `FREELLMAPI_API_KEY=${ctx.apiKey}\n`,
-      },
+      { path: path.join(home, 'config.yaml'), format: 'yaml', value, sensitive: true },
     ],
     notes: [
       'Install Hermes Agent with: curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup',

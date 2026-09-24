@@ -403,9 +403,10 @@ exports[`tool generators > setup-hermes has stable golden output 1`] = `
     {
       "format": "yaml",
       "path": "/home/tester/.hermes/config.yaml",
+      "sensitive": true,
       "value": {
         "model": {
-          "api_key": "\${FREELLMAPI_API_KEY}",
+          "api_key": "freellmapi-test-key",
           "api_key_env": undefined,
           "api_mode": "chat_completions",
           "base_url": "http://localhost:3000/v1",
@@ -418,13 +419,6 @@ exports[`tool generators > setup-hermes has stable golden output 1`] = `
           "provider": "custom",
         },
       },
-    },
-    {
-      "content": "FREELLMAPI_API_KEY=freellmapi-test-key
-",
-      "format": "env",
-      "path": "/home/tester/.hermes/.env",
-      "sensitive": true,
     },
   ],
   "notes": [

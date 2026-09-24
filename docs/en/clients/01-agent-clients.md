@@ -185,9 +185,11 @@ anything but api.openai.com and `OPENAI_API_KEY` is only sent to OpenAI hosts,
 so a custom endpoint has to be declared in the `model` block. `setup-hermes`
 writes that block — `provider: custom`, `api_mode: chat_completions`, the
 gateway's `/v1` as `base_url`, the chosen model as `default` with its
-`context_length` from the live catalog — and references the key as
-`api_key: "${FREELLMAPI_API_KEY}"`, Hermes's own substitution, with the value
-in `~/.hermes/.env` (mode 0600), which Hermes loads on its own. A fresh
+`context_length` from the live catalog — and puts the key in directly as a
+literal `api_key`. Hermes documents a literal there; its `${VAR}` form expands
+only from the process environment, never from `~/.hermes/.env` alone, so a
+placeholder would be sent verbatim and get a 401. The file is written mode
+0600. A fresh
 install ships `model: ""`, the "not configured" sentinel; replacing it is
 exactly what `hermes setup` would do, and it is what lets a headless first
 run skip the wizard. Every other key in the file is left as it was.

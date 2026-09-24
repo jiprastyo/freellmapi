@@ -428,21 +428,24 @@ describe('tool generators', () => {
     expect(tools.find(tool => tool.id === 'openclaw')!.generate(context).files[0].path).toBe('/etc/openclaw.json');
   });
 
-  it('writes Hermes Agent as a custom model block with the key routed through its .env', () => {
+  it('writes Hermes Agent as a custom model block with the key inline', () => {
     // config.yaml is Hermes's single source of truth for the endpoint:
     // OPENAI_BASE_URL is ignored for non-OpenAI hosts and OPENAI_API_KEY is only
-    // sent to OpenAI hosts, so both go in the `model` block, the key as the
-    // `${VAR}` form Hermes expands from ~/.hermes/.env. Leftover key_env keys
-    // from the wizard are retired so they cannot shadow api_key.
-    const [config, env] = tools.find(tool => tool.id === 'hermes')!.generate(context).files;
+    // sent to OpenAI hosts, so both go in the `model` block. The key is a
+    // literal: Hermes's `${VAR}` form expands only from the process
+    // environment at config load, not from ~/.hermes/.env, so a placeholder
+    // would be sent verbatim and get a 401. Leftover key_env keys from the
+    // wizard are retired so they cannot shadow api_key.
+    const [config] = tools.find(tool => tool.id === 'hermes')!.generate(context).files;
     expect(config.path).toBe('/home/tester/.hermes/config.yaml');
     expect(config.format).toBe('yaml');
+    expect(config.sensitive).toBe(true);
     expect(config.value).toEqual({
       model: {
         provider: 'custom',
         default: 'fast-coder',
         base_url: 'http://localhost:3000/v1',
-        api_key: '${FREELLMAPI_API_KEY}',
+        api_key: 'freellmapi-test-key',
         api_mode: 'chat_completions',
         context_length: 131072,
         default_headers: { 'User-Agent': 'hermes-agent' },
@@ -450,9 +453,6 @@ describe('tool generators', () => {
         api_key_env: undefined,
       },
     });
-    expect(env.path).toBe('/home/tester/.hermes/.env');
-    expect(env.sensitive).toBe(true);
-    expect(env.content).toBe('FREELLMAPI_API_KEY=freellmapi-test-key\n');
   });
 
   it('gives a named Hermes profile a providers entry instead of the default model', () => {
