@@ -42,23 +42,7 @@
 
 **Fix:** `QUOTA_OBSERVATIONS_RETENTION_DAYS=30` / `QUOTA_OBSERVATIONS_MAX_ROWS=200000` prune daily in `5k`/`250ms` chunks (`4a8f095`); ensure the DB is on a fast volume. Check `server/src/services/request-retention.ts:68-137` and `provider-quota.ts:532-586` correlated `LIMIT 1` seek.
 
-## Password-reset code not visible (desktop)
-
-**Symptom:** `POST /api/auth/forgot-password` prints a one-time code but the desktop app shows nothing.
-
-**Cause:** Finder/Explorer-launched Electron has no attached `stdout`.
-
-**Fix:** Open tray → `Open Logs Folder` → `freeapi.log` (`desktop/src/logger.ts` tee, `installFileLogger` before server boot). Or use `docker logs`.
-
-## Update-check shows no update / unsigned build won't auto-update
-
-**Symptom:** Dashboard checker shows `latest > running` but `Squirrel.Mac` refuses, or DMG auto-update fails.
-
-**Cause:** `Squirrel.Mac` verifies code signature. An unsigned local `npm run dist` without certs produces an app but no valid update feed (`desktop/02-logging-and-updates.md`). DMG needs re-stamp via `refresh-mac-update-metadata.mjs` after `Apple stapler`.
-
-**Fix:** Download the signed release from GitHub Releases, or sign with `CSC_*` / `APPLE_ID`.
-
-## Reverse proxy `TRUST_PROXY` not seeing real client IP
+## Quota panels show stale or ranking delay
 
 **Symptom:** Analytics / rate limiting shows `127.0.0.1` instead of real client.
 
@@ -68,6 +52,5 @@
 
 ## Related
 
-- [Desktop](../desktop/OVERVIEW.md) — `freeapi.log` rotation.
 - [Proxy transports](../proxy/OVERVIEW.md) — fetch-relay protocol.
 - [Env vars](../env/01-variables.md) — all knobs.

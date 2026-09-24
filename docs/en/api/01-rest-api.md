@@ -207,7 +207,7 @@ Bearer auth works too. Gemini's `?key=` query parameter is accepted only below
 The opt-in Ollama surface implements tags, chat, generate, show, version, embed,
 and legacy embeddings under `/api/*`. Streaming is Ollama-compatible NDJSON.
 It defaults to `off`; choose `open-loopback` or `key-required` on
-**Keys → Agents**. Open-loopback checks the direct socket peer, so desktop LAN
+**Keys → Agents**. Open-loopback checks the direct socket peer, so LAN
 access cannot silently turn it into an unauthenticated LAN endpoint.
 
 The dashboard also owns `/api/embeddings`. A request with a valid dashboard

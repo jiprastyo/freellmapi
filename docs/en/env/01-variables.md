@@ -128,7 +128,7 @@ In Docker, `127.0.0.1` is the container, not your machine — see [03-outbound-p
 | `FREELLMAPI_COMMIT_SHA` | Injected by official builds | Build metadata identifying the exact commit. Normally should not be set in `.env`. |
 | `FREELLMAPI_INSTALL_METHOD` | Injected by official builds (the Docker image sets `docker`) | Install-type metadata used by the update checker. Normally should not be set in `.env`. |
 | `CLIENT_DIST` | Bundled client build | Path to a prebuilt client `dist` directory to serve. Set this only if you build the dashboard separately. |
-| `FREEAPI_ENV_PATH` | `./.env` | Explicit path to the `.env` file to load. Useful for embedders (e.g. the desktop app, where the code runs from inside a bundle); dotenv silently no-ops on a missing file. |
+| `FREEAPI_ENV_PATH` | `./.env` | Explicit path to the `.env` file to load. Useful when the server runs from somewhere other than the repo root (e.g. a built server whose `.env` lives elsewhere); dotenv silently no-ops on a missing file. |
 
 ## Idempotency
 

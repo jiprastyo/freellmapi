@@ -122,4 +122,4 @@ FreeLLMAPI 从 `.env` 读取的全部变量，按主题分组。默认值和说�
 | `FREELLMAPI_COMMIT_SHA` | 由官方构建注入 | 标识确切提交的构建元数据。一般不应写进 `.env`。 |
 | `FREELLMAPI_INSTALL_METHOD` | 由官方构建注入（Docker 镜像设为 `docker`） | 更新检查器使用的安装类型元数据。一般不应写进 `.env`。 |
 | `CLIENT_DIST` | 随附的客户端构建 | 指向要伺服的预构建客户端 `dist` 目录的路径。只有单独构建仪表盘时才需要设置。 |
-| `FREEAPI_ENV_PATH` | `./.env` | 要加载的 `.env` 文件的显式路径。对嵌入式场景有用（例如桌面应用，代码从打包内部运行）；dotenv 对缺失文件静默忽略。 |
+| `FREEAPI_ENV_PATH` | `./.env` | 要加载的 `.env` 文件的显式路径。对服务端运行位置与仓库根目录不同的场景有用（例如构建后的服务，其 `.env` 放在别处）；dotenv 对缺失文件静默忽略。 |

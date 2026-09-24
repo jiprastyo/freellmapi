@@ -18,8 +18,6 @@ Aggregate free tiers from dozens of providers, plus custom OpenAI-compatible cha
 **English** · [简体中文](README.zh-cn.md)
 
 <p align="center">
-  <a href="https://github.com/tashfeenahmed/freellmapi/releases/latest"><img src="repo-assets/badges/macos.svg" height="48" alt="Download for macOS"></a>
-  <a href="https://github.com/tashfeenahmed/freellmapi/releases/latest"><img src="repo-assets/badges/windows.svg" height="48" alt="Download for Windows"></a>
   <a href="docs/en/install/01-install.md#docker-compose"><img src="repo-assets/badges/docker.svg" height="48" alt="Self-host with Docker"></a>
   <a href="https://play.google.com/store/apps/details?id=co.freellmapi.app"><img src="repo-assets/badges/play-store.svg" height="48" alt="Get it on Google Play"></a>
   <a href="https://apps.apple.com/app/id6804648934"><img src="repo-assets/badges/app-store.svg" height="48" alt="Download on the App Store"></a>
@@ -43,7 +41,6 @@ Your router updates its own model catalog from a signed feed: new free models, q
 - [How it compares](#how-it-compares)
 - [Features](#features)
 - [Quick start](#quick-start)
-- [Desktop app](#desktop-app)
 - [Works with OpenAI-compatible clients](#works-with-openai-compatible-clients)
 - [Languages](#languages)
 - [Premium (live catalog)](#premium-live-catalog)
@@ -186,19 +183,9 @@ Prefer to read before you pipe to bash? [The script is here](https://freellmapi.
 
 Open http://localhost:3001, add your provider keys on the **Keys** page, reorder the **Fallback Chain** to taste, and grab your unified API key from the **Keys** page header. That unified key is what you point your OpenAI SDK at.
 
-On Windows, the easiest path is the desktop **[`.exe` installer from Releases](https://github.com/tashfeenahmed/freellmapi/releases/latest)** (below). On Android, see the experimental [Termux guide](docs/en/install/02-android-termux.md).
+On Windows, run the server under [WSL with Docker](docs/en/install/01-install.md), or use local development (`npm run dev`). On Android, see the experimental [Termux guide](docs/en/install/02-android-termux.md).
 
 Everything else — Docker Compose, local development, declarative startup config, production builds, LAN access, and backups — is in **[docs/en/install/01-install.md](docs/en/install/01-install.md)**.
-
-## Desktop app
-
-A native menu-bar app lives in [`desktop/`](./desktop): the entire router + dashboard running locally from your tray, with a glass popover showing live request stats.
-
-![FreeLLMAPI desktop app](repo-assets/desktop.png)
-
-**[Download from Releases](https://github.com/tashfeenahmed/freellmapi/releases/latest)** — the macOS `.dmg` and the Windows `.exe` installer are attached to every release. No account or password to set up: the only credential you need is the unified API key from the tray popover. Build-from-source steps and where your data lives: [docs/en/install/01-install.md#desktop-app](docs/en/install/01-install.md#desktop-app).
-
-For macOS 12 Monterey or later, choose **arm64 (Apple Silicon)** or **x64 (Intel)**. Both Mac builds also include a ZIP download.
 
 ## Works with OpenAI-compatible clients
 
@@ -234,7 +221,7 @@ FreeLLMAPI is local-first and single-user by design. Your provider keys stay in 
 
 ## Languages
 
-The dashboard ships in **60 languages** (the desktop tray menu in 6). The UI
+The dashboard ships in **60 languages**. The UI
 auto-detects your browser/system language on first load and you can switch any
 time from **⋯ → Settings**; the choice is remembered. Right-to-left languages
 (العربية, עברית, فارسی, اردو) flip the whole layout automatically, and only the
@@ -252,9 +239,8 @@ a great first contribution.
 Translations live in [`client/src/i18n/locales/`](./client/src/i18n/locales) as
 flat JSON files. To fix a string, edit the value in the locale's JSON file. To
 add a language, copy `en.json`, translate the values, and register the locale in
-`client/src/i18n/locale-config.ts` (and `desktop/src/i18n.ts` for the tray
-strings); `npm test` checks every locale for key/placeholder parity — PRs
-welcome.
+`client/src/i18n/locale-config.ts`; `npm test` checks every locale for
+key/placeholder parity — PRs welcome.
 
 ## Premium (live catalog)
 
@@ -346,13 +332,13 @@ One request in, the best free model out: the router picks the highest-priority m
 
 ## FAQ
 
-**Do I need a password?** Not for the desktop app — the dashboard signs itself in with a hidden local account, so there is nothing to set up and nothing to forget. Open it from the tray icon → **Open Dashboard**. Server installs (Docker, one-liner, `npm run dev`) do have an email + password account.
+**Do I need a password?** Yes — every install has an email + password account for the dashboard. Create it on first visit to the dashboard; the unified API key on the **Keys** page is what your apps use.
 
-**I forgot the password on a server install.** Click **Forgot password?** on the login page. There is no email to send a link to, so the one-time code is printed to the server log — read it with `docker compose logs -f freellmapi` (or in the terminal running the server, or in the desktop log file), then enter it on the reset form. The code lasts 15 minutes.
+**I forgot the password.** Click **Forgot password?** on the login page. There is no email to send a link to, so the one-time code is printed to the server log — read it with `docker compose logs -f freellmapi` (or in the terminal running the server), then enter it on the reset form. The code lasts 15 minutes.
 
-**Where are the logs?** In the container log for Docker, in the terminal for a source run, and in `<data dir>/logs/freeapi.log` for the desktop app — reachable from the tray menu's **Open Logs Folder**.
+**Where are the logs?** In the container log for Docker, or in the terminal for a source run.
 
-**How do I uninstall?** Remove the app (Trash on macOS, *Settings → Apps* on Windows, `docker compose down -v` for Docker), then delete the data directory: `%APPDATA%\FreeLLMAPI\`, `~/Library/Application Support/FreeLLMAPI/`, or `~/.config/FreeLLMAPI/`. Uninstalling never touches that folder on its own.
+**How do I uninstall?** For Docker, run `docker compose down -v` and delete `~/freellmapi`. For a source install, stop the server and delete the checkout plus its data directory (`server/data/`, or wherever `FREEAPI_DB_PATH` points).
 
 Longer answers, per install method: **[docs/en/install/01-install.md#faq-passwords-logs-uninstall](docs/en/install/01-install.md#faq-passwords-logs-uninstall)**.
 

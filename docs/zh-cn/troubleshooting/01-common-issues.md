@@ -42,22 +42,6 @@
 
 **修复：** `QUOTA_OBSERVATIONS_RETENTION_DAYS=30` / `QUOTA_OBSERVATIONS_MAX_ROWS=200000` 会以 `5k` / `250ms` 为块每日清理（`4a8f095`）；请确保数据库位于高速卷上。检查 `server/src/services/request-retention.ts:68-137` 与 `provider-quota.ts:532-586` 中相关的 `LIMIT 1` 索引查找。
 
-## 密码重置验证码不可见（桌面端）
-
-**现象：** `POST /api/auth/forgot-password` 在控制台打印了一次性验证码，但桌面应用未显示。
-
-**原因：** 从 Finder / Explorer 启动的 Electron 没有附加 `stdout`。
-
-**修复：** 打开托盘 → `Open Logs Folder` → `freeapi.log`（`desktop/src/logger.ts` 的 tee，`installFileLogger` 在 server 启动前安装）。或使用 `docker logs`。
-
-## 更新检查显示无更新 / 未签名构建无法自动更新
-
-**现象：** 仪表盘检查器显示 `latest > running`，但 `Squirrel.Mac` 拒绝更新，或 DMG 自动更新失败。
-
-**原因：** `Squirrel.Mac` 会校验代码签名。未带证书的本地 `npm run dist` 能产出应用，但不会产生有效的更新源（`desktop/02-logging-and-updates.md`）。DMG 在 `Apple stapler` 公证后需经 `refresh-mac-update-metadata.mjs` 重新盖戳。
-
-**修复：** 从 GitHub Releases 下载已签名的发布包，或使用 `CSC_*` / `APPLE_ID` 进行签名。
-
 ## 反向代理 `TRUST_PROXY` 未获取到真实客户端 IP
 
 **现象：** 分析 / 限流显示 `127.0.0.1` 而非真实客户端。
@@ -68,6 +52,5 @@
 
 ## 相关
 
-- [桌面端](../desktop/OVERVIEW.md) — `freeapi.log` 轮转。
 - [代理传输](../proxy/OVERVIEW.md) — fetch-relay 协议。
 - [环境变量](../env/01-variables.md) — 全部配置项。

@@ -51,10 +51,6 @@ On first ingest (or explicit `initServerLogs()` call):
 
 The public query API (`queryLogs({ levels, q, provider, sinceId, limit })`), level-count badges (`levelCounts()`), and clear/reset behavior (`clearLogs()`, `resetServerLogsForTest()`) are specified in the [Server Logs Viewer API contract](../logs/01-server-logs-viewer.md#api-contract). The ID counter is preserved across `clearLogs()` so a dashboard cursor never sees duplicate ids.
 
-### Desktop file logger
-
-The desktop app has no terminal attached, so it tees every console line to a **file logger** (`desktop/src/logger.ts`, added in `90aaa5b`) instead of relying on the in-memory ring: `<data dir>/logs/freeapi.log`, plus one rotated `freeapi.log.1` at 1 MB each. The same redaction wrapper feeds both the ring (server) and the file (desktop), so secrets never reach the file either. The desktop's password-reset code appears here — see the [Install & deploy FAQ](../install/01-install.md#where-are-the-logs).
-
 ---
 
 ## 2. Request Analytics (`request-log.ts`)

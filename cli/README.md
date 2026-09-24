@@ -9,7 +9,7 @@ npx freellmapi setup-claude --url http://localhost:3001 --api-key <your-key>
 ```
 
 No install step, no account. The unified API key comes from your FreeLLMAPI
-dashboard (or the tray popover in the desktop app).
+dashboard.
 
 ## Commands
 

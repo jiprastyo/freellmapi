@@ -4,14 +4,13 @@
 
 [← 返回 README](../README.md) · [文档索引](../README.md)
 
-把 FreeLLMAPI 跑起来所需的一切：一行命令、Docker Compose、本地开发、声明式配置、生产构建、桌面应用，以及你的数据存放在哪里。
+把 FreeLLMAPI 跑起来所需的一切：一行命令、Docker Compose、本地开发、声明式配置、生产构建，以及你的数据存放在哪里。
 
 - [快速开始](#快速开始)
 - [Docker Compose](#docker-compose)
 - [本地开发](#本地开发)
 - [声明式启动配置](#声明式启动配置)
 - [Docker 镜像与运维](#docker-镜像与运维)
-- [桌面应用](#桌面应用)
 - [凭据与数据存放位置](#凭据与数据存放位置)
 
 ## 快速开始
@@ -24,7 +23,7 @@ curl -fsSL https://freellmapi.co/install.sh | bash
 
 不放心直接管道给 bash？[脚本在这里](https://freellmapi.co/install.sh)。重复执行是安全的：你的 `.env`（以及加密密钥）会被保留，容器会更新到 `:latest`。可以用 `FREELLMAPI_DIR`、`PORT` 或 `HOST_BIND` 环境变量覆盖默认值。
 
-在 Windows 上，最省事的方式是桌面版 **[Releases 里的 `.exe` 安装包](https://github.com/tashfeenahmed/freellmapi/releases/latest)**（见[下文](#桌面应用)）；上面的 Docker 步骤在 WSL 或任意 bash shell 里同样可用。
+在 Windows 上，上面的 Docker 步骤在 WSL 或任意 bash shell 里同样可用；不用 Docker 时，可以用本地开发（`npm run dev`）。
 
 在 Android 上，参见实验性的 [Termux 安装指南](02-android-termux.md)。它使用 Node 内置的 SQLite 驱动，不需要 Android NDK。
 
@@ -221,46 +220,15 @@ FREEAPI_DB_BACKUP_INTERVAL_MS=300000
 
 更多 Docker 运维内容和示例在 [docker/README.md](../../../docker/README.md)。
 
-## 桌面应用
-
-[`desktop/`](../../../desktop) 里有一个原生的菜单栏应用：整个路由器加仪表盘就在你的托盘里本地运行，还有一个玻璃质感的悬浮窗显示实时请求统计。
-
-![FreeLLMAPI 桌面应用](../../../repo-assets/desktop.png)
-
-**[从 Releases 下载](https://github.com/tashfeenahmed/freellmapi/releases/latest)** —— macOS 的 `.dmg` 和 Windows 的 `.exe` 安装包由 [`desktop-release`](../../../.github/workflows/desktop-release.yml) 工作流在每个版本发布时构建并附带。你也可以花几分钟从本仓库自己构建：
-
-**Mac 下载：** Apple Silicon 请选择 `arm64`，Intel 请选择 `x64`。两者都要求 macOS 12 Monterey 或更高版本，并提供 DMG 和 ZIP 下载。
-
-> **Windows 用户从源码构建的注意事项：** 构建桌面应用需要为 Electron 编译原生 SQLite 模块。在执行 `npm install` 之前，你必须先装好 [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)（具体来说是「使用 C++ 的桌面开发」工作负载）以及 Python。
-
-```bash
-npm install
-npm install --prefix desktop  # 安装桌面端依赖
-npm run desktop:dist          # macOS  → desktop/dist-electron/FreeLLMAPI-…-arm64.dmg
-npm run desktop:dist:mac:x64  # Intel Mac → desktop/dist-electron/FreeLLMAPI-…-x64.dmg
-npm run desktop:dist:win      # Windows → "desktop/dist-electron/FreeLLMAPI Setup ….exe"
-```
-
-> 本地构建出来的应用没有签名，所以 Windows SmartScreen 首次运行时可能会警告（点「更多信息」→「仍要运行」）；macOS 构建则不会触发 Gatekeeper 提示。
-> 完整说明见 [desktop/README.md](../../../desktop/README.md)。
-
 ## 凭据与数据存放位置
 
-桌面应用 **不需要设置用户名或密码**。服务器版会用邮箱加密码的账号把仪表盘挡在登录后面，而桌面版不同：它用一个隐藏的本地账号自动登录仪表盘，所以你永远不会被要求输入凭据，也不需要有一个。
+你的应用唯一需要的凭据是那把 **统一 API 密钥**，也就是你的 OpenAI/Anthropic 客户端要指向的 `freellmapi-…` 令牌。在仪表盘 **密钥** 页的顶部可以拿到。
 
-你唯一需要的凭据是那把 **统一 API 密钥**，也就是你的 OpenAI/Anthropic 客户端要指向的 `freellmapi-…` 令牌。可以从这两个地方拿到：
+仪表盘本身由一个 **邮箱加密码的账号** 保护，第一次访问仪表盘时创建。
 
-- 托盘悬浮窗：点击托盘图标，然后点 **复制密钥**；或者
-- 仪表盘 **密钥** 页的顶部（托盘 → **打开仪表盘**）。
+你不需要手动打开或编辑 SQLite 数据库。你的设置和数据放在两处：
 
-你不需要手动打开或编辑 `freeapi.db`。
+- `.env` 文件（加密密钥、端口、绑定地址和其他设置），以及
+- SQLite 数据库 `server/data/freeapi.db`（全部密钥、模型和设置，加密存储）——或者 `FREEAPI_DB_PATH` 指向的位置。使用 Docker 时，它是 `/app/server/data` 下的 `freellmapi-data` 卷。
 
-你的设置和数据按操作系统存放在一个文件夹里（迁移到另一台机器或搬进容器时，复制它就行）：
-
-| 操作系统 | 位置 |
-|----|----------|
-| Windows | `%APPDATA%\FreeLLMAPI\`（例如 `C:\Users\<你>\AppData\Roaming\FreeLLMAPI\`） |
-| macOS | `~/Library/Application Support/FreeLLMAPI/` |
-| Linux | `~/.config/FreeLLMAPI/` |
-
-这个文件夹里有 `freeapi.db`（全部密钥、模型和设置，加密存储）和 `config.json`（窗口、主题、端口、局域网偏好）。搬迁安装时两个都要复制。对于服务器（非桌面）部署，对应的状态是 `.env` 文件和位于 `server/data/freeapi.db`（或者 `FREEAPI_DB_PATH` 指向的位置）的 SQLite 数据库。
+搬迁安装到另一台机器或搬进容器时，复制这两处即可。

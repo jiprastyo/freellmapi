@@ -31,7 +31,7 @@ fix is out.
 
 A useful report includes:
 
-- Affected version or commit, and how you run it (Docker, `npm run dev`, desktop app).
+- Affected version or commit, and how you run it (Docker, `npm run dev`).
 - The impact — what an attacker gets (read keys, bypass auth, RCE, etc.).
 - Steps to reproduce: the exact request, config, or `.env` settings involved.
   Redact your real provider keys.
@@ -57,7 +57,6 @@ In scope:
   and the unified `freellmapi-…` API key.
 - Key handling: AES-256-GCM encryption at rest, `ENCRYPTION_KEY` usage, encrypted
   DB backups, key import/export.
-- The Electron desktop app and its local data directory.
 - The Docker image and packaging (`Dockerfile`, `docker-compose.yml`, the install
   script), including anything that leaks secrets into image layers or logs.
 - Premium license key validation and the signed catalog feed.

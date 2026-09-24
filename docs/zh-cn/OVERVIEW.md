@@ -14,11 +14,10 @@
 | [clients/](clients/OVERVIEW.md) | [en/clients/](clients/OVERVIEW.md) | 客户端与编程智能体：兼容 OpenAI 的客户端、配置配方、MCP、编辑器补全。 |
 | [compression/](compression/OVERVIEW.md) | [en/compression/](compression/OVERVIEW.md) | 提示词压缩：模式、安全保护、按请求控制、过滤器、统计。 |
 | [deployment/](deployment/OVERVIEW.md) | [en/deployment/](deployment/OVERVIEW.md) | Docker 运维：镜像、Compose、网络、升级、备份。 |
-| [desktop/](desktop/OVERVIEW.md) | [en/desktop/](desktop/OVERVIEW.md) | 桌面应用：Electron 结构、文件日志、更新分发。 |
 | [env/](env/OVERVIEW.md) | [en/env/](env/OVERVIEW.md) | 运行时配置：`.env` 变量、加密密钥、出站代理。 |
 | [fallback/](fallback/OVERVIEW.md) | [en/fallback/](fallback/OVERVIEW.md) | 命名回退链：生命周期、`auto:<name>`、目录同步回填。 |
 | [glossary/](glossary/OVERVIEW.md) | [en/glossary/](glossary/OVERVIEW.md) | 术语表：余量、RPD/TPD、池键、`auto:<name>`、模型年龄闸。 |
-| [install/](install/OVERVIEW.md) | [en/install/](install/OVERVIEW.md) | 安装：快速开始、Docker Compose、本地开发、桌面应用、Termux。 |
+| [install/](install/OVERVIEW.md) | [en/install/](install/OVERVIEW.md) | 安装：快速开始、Docker Compose、本地开发、Termux。 |
 | [logs/](logs/OVERVIEW.md) | [en/logs/](logs/OVERVIEW.md) | 服务器日志查看器：实时面板、两级存储、轮询 API。 |
 | [providers/](providers/OVERVIEW.md) | [en/providers/](providers/OVERVIEW.md) | 提供方集成：支持的平台目录、额度核算、添加新提供方。 |
 | [proxy/](proxy/OVERVIEW.md) | [en/proxy/](proxy/OVERVIEW.md) | 出站代理传输：正向代理与 Fetch Relay、系统自动检测。 |

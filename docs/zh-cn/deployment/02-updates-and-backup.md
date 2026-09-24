@@ -22,7 +22,7 @@ docker compose pull && docker compose up -d
 1. **保持同一个 `.env` 的 `ENCRYPTION_KEY`。** 提供方密钥是静态加密的；换了密钥，所有已存密钥都无法解密。见 [../env/02-security-and-keys.md](../env/02-security-and-keys.md)。
 2. **保持同一个数据卷**（`freellmapi-data`，位于 `/app/server/data`）。迁移在每次启动时幂等地执行。
 
-桌面版仪表盘的更新对话框会为 Docker 安装显示这条确切的命令（见下文）。
+仪表盘的更新对话框会为 Docker 安装显示这条确切的命令（见下文）。
 
 ## 仪表盘更新检查器（#635 / #703）
 
@@ -33,7 +33,7 @@ docker compose pull && docker compose up -d
 | `FREELLMAPI_UPDATE_CHECK` | 启用 | 设为 `off` 可把检查器从设置页隐藏，并阻止 Git 发现和对外发出的更新检查请求。这也会一并关掉自动版本提醒——一个独立的仪表盘设置项（设置 > 通用），在被打开之前始终保持关闭。 |
 | `FREELLMAPI_UPDATE_GITHUB_TOKEN` | 空（匿名检查） | 仅用于对 GitHub 做更新检查的可选令牌。只有在需要更高限额时才使用窄权限令牌；通用的 `GITHUB_TOKEN` 值会被有意忽略。 |
 
-两个构建层面的事实支撑着版本显示：`FREELLMAPI_INSTALL_METHOD=docker` 告诉服务器该建议哪条升级路径；runtime 镜像还会复制 `desktop/package.json` ——发布版本号就住在那里，因为 `server/package.json` 跟踪的是工作区版本——作为一个约 400 字节的清单，让容器安装能报出自己的版本（#703）。
+两个构建层面的事实支撑着版本显示：`FREELLMAPI_INSTALL_METHOD=docker` 告诉服务器该建议哪条升级路径；发布版本号来自运行时镜像根目录的 `/app/package.json` 清单（#703）。
 
 ## 备份 SQLite 数据卷
 

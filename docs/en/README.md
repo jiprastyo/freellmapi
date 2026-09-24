@@ -6,7 +6,7 @@ This is the user entry point — start here to install the gateway, call the Ope
 
 ## Guides
 
-- **[Install & deploy](install/01-install.md)** — quick start, Docker Compose, local development, declarative startup config, the Docker image, backups, the desktop app, where your data lives, and an FAQ on password resets, logs and uninstalling.
+- **[Install & deploy](install/01-install.md)** — quick start, Docker Compose, local development, declarative startup config, the Docker image, backups, where your data lives, and an FAQ on password resets, logs and uninstalling.
 - **[API reference](api/01-rest-api.md)** — chat completions, `auto:*` routing strategies, streaming, tool calling, vision, Gemini Google Search grounding, embeddings, response headers, and the Anthropic Messages surface.
 - **[Clients & coding agents](clients/01-agent-clients.md)** — OpenAI-compatible clients, recipes for Claude Code / Codex CLI / Cline / Continue / Aider / opencode / Cursor, the MCP server, editor autocomplete, and Context Handoff.
 - **[Prompt compression](compression/01-compression-pipeline.md)** — request-side modes, safeguards, per-request controls, custom tool-output filters, statistics, and preview APIs.
@@ -18,7 +18,6 @@ This is the user entry point — start here to install the gateway, call the Ope
 - [Android with Termux](install/02-android-termux.md) — experimental local installation using Node's built-in SQLite driver.
 - [Fallback chains](fallback/01-named-chains.md) — named fallback-chain lifecycle, empty-chain authoritative 400, `auto:<name>` routing, and catalog-sync backfill.
 - [Docker deployment](../../docker/README.md) — container configuration and persistent storage.
-- [Desktop app](../../desktop/README.md) — build and package the Electron application.
 - [Contributor guide](../../CONTRIBUTING.md) — development loop, testing expectations, and contribution policy.
 - [Database migrations](../../server/src/db/README.md) — create, apply, inspect, and roll back schema migrations.
 

@@ -22,7 +22,7 @@ Two invariants across any upgrade:
 1. **Keep the same `.env` `ENCRYPTION_KEY`.** Provider keys are encrypted at rest; a changed key makes every stored key undecryptable. See [02-security-and-keys.md](../env/02-security-and-keys.md).
 2. **Keep the same data volume** (`freellmapi-data` at `/app/server/data`). Migrations run idempotently on boot.
 
-The desktop dashboard's update dialog shows this exact command for Docker installs (see below).
+The dashboard's update dialog shows this exact command for Docker installs (see below).
 
 ## Dashboard update checker (#635 / #703)
 
@@ -33,7 +33,7 @@ Settings carries a single update surface: it reports the running release, lists 
 | `FREELLMAPI_UPDATE_CHECK` | Enabled | Set to `off` to hide the checker from Settings and prevent Git discovery or outbound update-check requests. This also switches off the automatic release reminder, a separate dashboard setting (Settings > General) that is off until turned on there. |
 | `FREELLMAPI_UPDATE_GITHUB_TOKEN` | Empty (anonymous checks) | Optional token used only for update checks against GitHub. Use a narrowly scoped token only if higher rate limits are needed; generic `GITHUB_TOKEN` values are intentionally ignored. |
 
-Two build-level facts back the version display: `FREELLMAPI_INSTALL_METHOD=docker` tells the server which upgrade path to suggest, and the runtime image copies `desktop/package.json` — where the release version lives, since `server/package.json` tracks the workspace — as a ~400-byte manifest so a container install can name its own version (#703).
+Two build-level facts back the version display: `FREELLMAPI_INSTALL_METHOD=docker` tells the server which upgrade path to suggest, and the release version comes from the runtime image's root `/app/package.json` manifest (#703).
 
 ## Backing up the SQLite data volume
 

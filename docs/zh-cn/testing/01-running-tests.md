@@ -14,8 +14,6 @@
 | cli | `npm run test -w cli` | Setup-CLI 测试（工具、配置文件合并、index）。 |
 | client | `npm run test -w client --if-present` | 客户端 vitest 套件加 i18n 一致性检查。 |
 
-desktop 工作区有自己的一小组套件（`desktop/src/__tests__/window-chrome.test.ts`），但不属于根链；它用自带工具经 `npm --prefix desktop` 运行。
-
 ## 按工作区的命令
 
 ### Server (`server/package.json`)

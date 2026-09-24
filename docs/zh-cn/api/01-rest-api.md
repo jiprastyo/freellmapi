@@ -179,7 +179,7 @@ curl "http://localhost:3001/v1beta/models/gemini-2.5-flash:generateContent" \
 
 ## Ollama 模拟
 
-这个需要主动开启的 Ollama 接口，在 `/api/*` 下实现了 tags、chat、generate、show、version、embed 以及旧版 embeddings。流式输出是 Ollama 兼容的 NDJSON。它默认为 `off`，可以在 **密钥 → 智能体** 里选择 `open-loopback` 或 `key-required`。open-loopback 模式会检查直连的套接字对端，所以桌面端的局域网访问不会在你不知情的情况下把它变成一个无身份验证的局域网端点。
+这个需要主动开启的 Ollama 接口，在 `/api/*` 下实现了 tags、chat、generate、show、version、embed 以及旧版 embeddings。流式输出是 Ollama 兼容的 NDJSON。它默认为 `off`，可以在 **密钥 → 智能体** 里选择 `open-loopback` 或 `key-required`。open-loopback 模式会检查直连的套接字对端，所以局域网访问不会在你不知情的情况下把它变成一个无身份验证的局域网端点。
 
 `/api/embeddings` 这个路径同时也归仪表盘所有。带着有效仪表盘会话的请求会交给仪表盘处理；其他所有打到这个确切路径的请求都被当作 Ollama 的旧版 embeddings，按上面的模拟策略处理。
 

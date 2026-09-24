@@ -14,8 +14,6 @@
 | cli | `npm run test -w cli` | Setup-CLI tests (tools, config-file merging, index). |
 | client | `npm run test -w client --if-present` | Client vitest suite plus i18n parity check. |
 
-The desktop workspace has its own small suite (`desktop/src/__tests__/window-chrome.test.ts`) but is not part of the root chain; it runs with its own tooling via `npm --prefix desktop`.
-
 ## Per-workspace commands
 
 ### Server (`server/package.json`)

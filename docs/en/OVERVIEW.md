@@ -14,11 +14,10 @@ Language-specific index for English documentation.
 | [clients/](clients/OVERVIEW.md) | Clients & coding agents: OpenAI-compatible clients, setup recipes, MCP, autocomplete. |
 | [compression/](compression/OVERVIEW.md) | Prompt compression: modes, safeguards, per-request controls, filters, statistics. |
 | [deployment/](deployment/OVERVIEW.md) | Docker operations: image, Compose, networking, upgrades, backups. |
-| [desktop/](desktop/OVERVIEW.md) | Desktop app: Electron shape, file logging, update delivery. |
 | [env/](env/OVERVIEW.md) | Runtime configuration: `.env` variables, encryption keys, outbound proxies. |
 | [fallback/](fallback/OVERVIEW.md) | Named fallback chains: lifecycle, `auto:<name>`, catalog-sync backfill. |
 | [glossary/](glossary/OVERVIEW.md) | Glossary of recurring terms: headroom, RPD/TPD, pool key, `auto:<name>`, model-age gate. |
-| [install/](install/OVERVIEW.md) | Installation: quick start, Docker Compose, local dev, desktop app, Termux. |
+| [install/](install/OVERVIEW.md) | Installation: quick start, Docker Compose, local dev, Termux. |
 | [logs/](logs/OVERVIEW.md) | Server logs viewer: live panel, two-tier store, polling API. |
 | [providers/](providers/OVERVIEW.md) | Provider integrations: supported-platform catalog, quota accounting, adding a provider. |
 | [proxy/](proxy/OVERVIEW.md) | Outbound proxy transports: forward vs fetch-relay, system auto-detect. |
