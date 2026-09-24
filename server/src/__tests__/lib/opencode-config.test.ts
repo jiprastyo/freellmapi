@@ -241,6 +241,81 @@ describe('syncOpencodeConfig (writes the free picker into opencode.json)', () =>
     expect(models['sees-image'].modalities.input).toEqual(['text', 'image']);
   });
 
+  it('never lets a catalog model named "auto" or "constructor" clobber the entry map', () => {
+    // The listing id is a SLUG of the display name (model-groups.ts
+    // slugifyGroupLabel), so a catalog model displayed as "Auto" reaches this
+    // writer with id "auto" — and would overwrite the user's verbatim `auto`
+    // router entry. "Constructor" slugs to `constructor`, an unsafe object key.
+    // (`__proto__` cannot survive slugging — underscores are stripped — but the
+    // writer still guards it as defense-in-depth.) A legit model must pass.
+    process.env.OPENCODE_CONFIG_PATH = cfg;
+    write(SAMPLE_CONFIG);
+    addModel('groq', 'rogue-1', 'Auto', 1);
+    addModel('cerebras', 'rogue-2', 'Constructor', 2);
+    addModel('google', 'rogue-3', 'Real Model', 3);
+    addKey('groq');
+    addKey('cerebras');
+    addKey('google');
+
+    const res = syncOpencodeConfig();
+    expect(res.written).toBe(true);
+    // Only "Real Model" made it in; "Auto" and "Constructor" were dropped.
+    expect(res.count).toBe(1);
+
+    const models = modelsOf(read());
+    // The user's verbatim `auto` survived, NOT the catalog's "Auto".
+    expect(models.auto).toEqual({ name: 'Auto (best available)', limit: { context: 200000, output: 64000 } });
+    expect(Object.keys(models)).toEqual(['auto', 'real-model']);
+    expect(models['real-model'].name).toBe('Real Model');
+    // No prototype-shaped key was emitted.
+    expect(Object.prototype.hasOwnProperty.call(models, 'constructor')).toBe(false);
+  });
+
+  it('treats a provider "__proto__" lookup as absent rather than reading Object.prototype', () => {
+    // Bracket access with '__proto__' hands back Object.prototype, which passes
+    // object-shape guards; own-property lookup must refuse instead.
+    process.env.OPENCODE_CONFIG_PATH = cfg;
+    write(SAMPLE_CONFIG);
+    addModel('groq', 'free-usable', 'Free Usable', 1);
+    addKey('groq');
+
+    process.env.OPENCODE_PROVIDER_ID = '__proto__';
+    const res = syncOpencodeConfig();
+    expect(res).toEqual({ enabled: true, skipped: 'provider "__proto__" not present in config' });
+    // File untouched.
+    expect(read()).toBe(SAMPLE_CONFIG);
+  });
+
+  it('refuses to write when the provider "models" block is not an object', () => {
+    // An array/other non-object models block is invalid for opencode too;
+    // rewriting would silently discard the user's `auto` (their configured
+    // default model), so it must skip with a reason instead.
+    process.env.OPENCODE_CONFIG_PATH = cfg;
+    const bad = JSON.parse(SAMPLE_CONFIG);
+    bad.provider['freellmapi-router'].models = ['not', 'an', 'object'];
+    write(JSON.stringify(bad));
+    addModel('groq', 'free-usable', 'Free Usable', 1);
+    addKey('groq');
+
+    const res = syncOpencodeConfig();
+    expect(res).toEqual({ enabled: true, skipped: 'provider "models" block is not an object — left untouched' });
+    expect(JSON.parse(read()).provider['freellmapi-router'].models).toEqual(['not', 'an', 'object']);
+  });
+
+  it('refuses to write when the only free+available ids are unsafe', () => {
+    // Same spirit as the empty-list rail: if every candidate id is unsafe we
+    // write nothing rather than a picker stripped of every real model.
+    // ("Constructor" slugs to `constructor`, an unsafe object key.)
+    process.env.OPENCODE_CONFIG_PATH = cfg;
+    write(SAMPLE_CONFIG);
+    addModel('groq', 'rogue-1', 'Constructor', 1);
+    addKey('groq');
+
+    const res = syncOpencodeConfig();
+    expect(res).toEqual({ enabled: true, skipped: 'no safe model ids in the free+available list — refusing to write' });
+    expect(read()).toBe(SAMPLE_CONFIG);
+  });
+
   it('every emitted entry satisfies opencode\'s own ProviderConfig schema', () => {
     // Regression guard for a bug that shipped: emitting the V2 names
     // (`capabilities`) and a partial `limit` made opencode reject the WHOLE

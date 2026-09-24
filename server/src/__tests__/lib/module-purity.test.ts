@@ -33,6 +33,7 @@ const LIB = path.resolve(here, '../../lib');
 const PURE_MODULES = [
   'budget.ts',
   'error-classify.ts',
+  'free-platforms.ts',
   'header-value.ts',
   'provider-identity.ts',
   'provider-size-parser.ts',

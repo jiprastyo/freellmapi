@@ -78,4 +78,36 @@ describe('startCatalogSync / stopCatalogSync', () => {
     expect(after).toHaveLength(1);
     expect(every).toHaveLength(1);
   });
+
+  it('a throwing opencode picker refresh must not reject the sync chain', async () => {
+    // F1 regression: syncOpencodeConfig() calls buildModelListing(), which hits
+    // the DB. A locked/corrupt DB must cost at most ONE skipped refresh —
+    // never an unhandled rejection, which on Node >= 15 terminates the process
+    // (and with it the tray's backend) on every 2h tick.
+    const opencodeConfig = await import('../../lib/opencode-config.js');
+    const spy = vi.spyOn(opencodeConfig, 'syncOpencodeConfig').mockImplementation(() => {
+      throw new Error('simulated DB failure');
+    });
+    const errors: unknown[] = [];
+    const unhandled = (e: unknown) => errors.push(e);
+    process.on('unhandledRejection', unhandled);
+
+    try {
+      const { scheduler, every } = makeScheduler();
+      startCatalogSync(scheduler);
+      // Fire the interval job once and give the promise chain a tick to settle.
+      every[0].fn();
+      await new Promise(resolve => setImmediate(resolve));
+      await new Promise(resolve => setImmediate(resolve));
+
+      // The chain settled without an unhandled rejection…
+      expect(errors).toEqual([]);
+      // …and the scheduler still holds its handles, i.e. sync itself survived.
+      expect(every).toHaveLength(1);
+    } finally {
+      process.removeListener('unhandledRejection', unhandled);
+      spy.mockRestore();
+      stopCatalogSync();
+    }
+  });
 });

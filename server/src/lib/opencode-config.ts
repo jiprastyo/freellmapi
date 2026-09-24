@@ -119,7 +119,11 @@ export function syncOpencodeConfig(): OpencodeSyncResult {
   if (typeof providers !== 'object' || providers === null || Array.isArray(providers)) {
     return { enabled: true, skipped: `no "provider" block` };
   }
-  const provider = (providers as Record<string, unknown>)[providerId];
+  // Own-property lookup only: a bracket access with a key like `__proto__`
+  // would hand back Object.prototype, which passes the object shape guard and
+  // would then get `models` assigned onto the prototype of every object.
+  const hasProvider = Object.prototype.hasOwnProperty.call(providers, providerId);
+  const provider = hasProvider ? (providers as Record<string, unknown>)[providerId] : undefined;
   if (typeof provider !== 'object' || provider === null || Array.isArray(provider)) {
     // Creating this block would mean also writing apiKey/baseURL/npm, which we
     // would be guessing. The provider is expected to already exist.
@@ -127,6 +131,13 @@ export function syncOpencodeConfig(): OpencodeSyncResult {
   }
 
   const providerObj = provider as Record<string, unknown>;
+  if (providerObj.models !== undefined &&
+      (typeof providerObj.models !== 'object' || providerObj.models === null || Array.isArray(providerObj.models))) {
+    // An array/other non-object here is invalid for opencode too. Rewriting it
+    // would silently discard whatever the user had — including `auto`, their
+    // configured default model — so refuse instead of "fixing" the shape.
+    return { enabled: true, skipped: 'provider "models" block is not an object — left untouched' };
+  }
   const existingModels = (typeof providerObj.models === 'object' && providerObj.models !== null && !Array.isArray(providerObj.models))
     ? providerObj.models as Record<string, unknown>
     : {};
@@ -143,7 +154,18 @@ export function syncOpencodeConfig(): OpencodeSyncResult {
   const models: Record<string, ModelEntry> = {};
   if (existingAuto !== undefined) models[AUTO_MODEL_ID] = existingAuto as ModelEntry;
 
+  // Model ids come from the REMOTE catalog. Two hazards as object keys:
+  //   - `__proto__`/`constructor`/`prototype` would set the prototype of the
+  //     map instead of adding a key (the model would silently vanish from the
+  //     serialized output);
+  //   - a catalog model literally named `auto` would overwrite the user's
+  //     verbatim `auto` entry carried across above.
+  // The catalog is signed, but the guard is two lines and removes the class.
+  const UNSAFE_IDS = new Set(['__proto__', 'constructor', 'prototype']);
+  let written = 0;
+
   for (const m of freeUsable) {
+    if (UNSAFE_IDS.has(m.id) || m.id === AUTO_MODEL_ID) continue;
     const entry: ModelEntry = { name: m.name };
     // Legacy names for what V2 calls capabilities.tools / capabilities.input.
     entry.tool_call = m.supportsTools;
@@ -153,6 +175,15 @@ export function syncOpencodeConfig(): OpencodeSyncResult {
     };
     if (m.contextWindow != null) entry.limit = { context: m.contextWindow, output: DEFAULT_OUTPUT_LIMIT };
     models[m.id] = entry;
+    written++;
+  }
+
+  // If every candidate id was unsafe (pathological), refuse to write rather
+  // than emit a picker stripped of every real model — same spirit as the
+  // empty-list rail. (`models` may still hold the carried-over `auto`, so the
+  // test is on how many NEW entries were written, not on the map size.)
+  if (written === 0) {
+    return { enabled: true, skipped: 'no safe model ids in the free+available list — refusing to write' };
   }
 
   // Compare against what is already there so an unchanged result does not
@@ -160,7 +191,9 @@ export function syncOpencodeConfig(): OpencodeSyncResult {
   // reason). Both sides come from parsed objects, so formatting style cannot
   // make them differ spuriously.
   if (JSON.stringify(existingModels, null, 2) === JSON.stringify(models, null, 2)) {
-    return { enabled: true, written: false, count: freeUsable.length };
+    // `written` (not freeUsable.length): the count must describe the file, and
+    // with unsafe ids filtered out freeUsable can be larger than the map.
+    return { enabled: true, written: false, count: written };
   }
 
   // Replace only this provider's models map, then re-serialize the document we
@@ -171,18 +204,21 @@ export function syncOpencodeConfig(): OpencodeSyncResult {
   // may be normalised to two-space indent, which opencode reads back fine.
   providerObj.models = models;
 
+  let tmp: string | undefined;
   try {
     // .bak first: this file holds other providers' API keys.
     fs.copyFileSync(configPath, `${configPath}.bak`);
-    const tmp = `${configPath}.tmp-${process.pid}`;
+    tmp = `${configPath}.tmp-${process.pid}`;
     fs.writeFileSync(tmp, `${JSON.stringify(root, null, 2)}\n`, 'utf8');
     fs.renameSync(tmp, configPath);
   } catch (err) {
+    // Do not leave a stale .tmp-<pid> behind on a failed write.
+    if (tmp !== undefined) { try { fs.rmSync(tmp, { force: true }); } catch { /* best effort */ } }
     const message = err instanceof Error ? err.message : String(err);
     return { enabled: true, skipped: `write failed: ${message}` };
   }
 
-  return { enabled: true, written: true, count: freeUsable.length };
+  return { enabled: true, written: true, count: written };
 }
 
 /** Test seam: does this install have the feature switched on? */

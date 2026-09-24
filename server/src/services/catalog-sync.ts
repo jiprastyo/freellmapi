@@ -17,6 +17,7 @@ import {
 } from './model-state.js';
 import { ensureAllModelsInProfiles } from './profile-models.js';
 import { syncOpencodeConfig } from '../lib/opencode-config.js';
+import type { OpencodeSyncResult } from '../lib/opencode-config.js';
 
 // Generative-media modalities are routed into the separate media_models table
 // (see services/media.ts), never into the chat `models` table.
@@ -853,15 +854,31 @@ export function startCatalogSync(scheduler: Scheduler): void {
     // syncCatalog never throws (it catches internally and returns a result), so
     // the `.then` reliably fires on success, on "up to date" and on error — the
     // opencode picker stays in step with whatever the catalog ended up being.
-    void syncCatalog().then(() => {
-      // opencode does not call GET /v1/models; its picker is whatever is
-      // hardcoded in opencode.json. Refresh that block on the same 2h cadence
-      // so "free models available and free to be used" reaches the picker too.
-      // No-op unless OPENCODE_CONFIG_PATH is set.
-      const res = syncOpencodeConfig();
-      if (res.written) console.log(`[catalog-sync] opencode picker refreshed (${res.count} free models)`);
-      else if (res.skipped) console.log(`[catalog-sync] opencode picker not written: ${res.skipped}`);
-    });
+    void syncCatalog()
+      .then(() => {
+        // opencode does not call GET /v1/models; its picker is whatever is
+        // hardcoded in opencode.json. Refresh that block on the same 2h cadence
+        // so "free models available and free to be used" reaches the picker too.
+        // No-op unless OPENCODE_CONFIG_PATH is set.
+        let res: OpencodeSyncResult;
+        try {
+          res = syncOpencodeConfig();
+        } catch (err) {
+          // buildModelListing() hits the DB; a locked/corrupt DB must cost at
+          // most ONE skipped refresh — never an unhandled rejection, which on
+          // Node >= 15 terminates the whole server process.
+          const message = err instanceof Error ? err.message : String(err);
+          console.error(`[catalog-sync] opencode picker refresh crashed: ${message}`);
+          return;
+        }
+        if (res.written) console.log(`[catalog-sync] opencode picker refreshed (${res.count} free models)`);
+        else if (res.skipped) console.log(`[catalog-sync] opencode picker not written: ${res.skipped}`);
+      })
+      .catch(err => {
+        // Belt and braces: nothing above may reject the chain.
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(`[catalog-sync] sync hook failed: ${message}`);
+      });
   };
   cancelBootTimer = scheduler.after(BOOT_DELAY_MS, run);
   cancelInterval = scheduler.every(SYNC_INTERVAL_MS, run);
