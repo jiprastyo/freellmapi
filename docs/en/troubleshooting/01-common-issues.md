@@ -49,6 +49,14 @@
 
 **Fix:** `TRUST_PROXY=1` for single reverse proxy (Caddy/nginx/Traefik on same host), or CIDR list (`TRUST_PROXY=100.64.0.0/10,192.168.1.10`). See `env/01-variables.md` `TRUST_PROXY` + `server/src/lib/config.ts:95-110` `parseTrustProxy()`.
 
+## Hermes sends `401 Invalid API key`
+
+**Symptom:** `~/.hermes/logs/agent.log` shows `401 Invalid API key` on every request, but the same key works with `curl -H "Authorization: Bearer …"`.
+
+**Cause:** `model.api_key` in `~/.hermes/config.yaml` is a `${VAR}` placeholder. Hermes expands `${VAR}` only from `os.environ` at config load — never from `~/.hermes/.env` alone — so the literal `${...}` string is sent as the Bearer token.
+
+**Fix:** Put the unified key literally in `model.api_key` (mode 0600), or re-run `npx freellmapi setup-hermes` (it writes the key literally). See `clients/01-agent-clients.md` Hermes troubleshooting table.
+
 ## Related
 
 - [Proxy transports](../proxy/OVERVIEW.md) — fetch-relay protocol.

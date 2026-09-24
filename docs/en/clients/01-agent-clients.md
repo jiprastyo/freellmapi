@@ -179,20 +179,18 @@ honoured when set.
 
 [Hermes Agent](https://hermes-agent.nousresearch.com/docs/) is Nous
 Research's self-improving agent, in the terminal or behind Telegram, Discord
-and the other messengers its gateway serves. `~/.hermes/config.yaml` is its
-single source of truth for the endpoint: `OPENAI_BASE_URL` is ignored for
-anything but api.openai.com and `OPENAI_API_KEY` is only sent to OpenAI hosts,
-so a custom endpoint has to be declared in the `model` block. `setup-hermes`
-writes that block — `provider: custom`, `api_mode: chat_completions`, the
-gateway's `/v1` as `base_url`, the chosen model as `default` with its
-`context_length` from the live catalog — and puts the key in directly as a
-literal `api_key`. Hermes documents a literal there; its `${VAR}` form expands
-only from the process environment, never from `~/.hermes/.env` alone, so a
-placeholder would be sent verbatim and get a 401. The file is written mode
-0600. A fresh
-install ships `model: ""`, the "not configured" sentinel; replacing it is
-exactly what `hermes setup` would do, and it is what lets a headless first
-run skip the wizard. Every other key in the file is left as it was.
+and the other messengers its gateway serves. This section is the full guide
+for pointing it at FreeLLMAPI: setup, verification, and the failure modes
+worth knowing.
+
+#### Why a config block, not env vars
+
+`~/.hermes/config.yaml` is hermes's single source of truth for the endpoint:
+`OPENAI_BASE_URL` is ignored for anything but api.openai.com and
+`OPENAI_API_KEY` is only sent to OpenAI hosts, so a custom endpoint has to be
+declared in the `model` block.
+
+#### Setup
 
 ```bash
 npx freellmapi setup-hermes --url http://localhost:3001 --api-key <unified-key>
@@ -200,19 +198,48 @@ curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-
 hermes -z "Say hello"
 ```
 
+`<unified-key>` is the key from the dashboard's **Keys** page header — the
+same one any OpenAI-compatible client uses.
+
 From a source checkout, run `npm install && npm run build -w cli` at the repo
 root first — a missing build makes npx fail with `sh: freellmapi: command not
-found`. In the TUI the gateway is the default model, shown as
-`custom/<model-id>`; `/model custom:<model-id>` picks another catalog id, and
-`--model <id>` pins it in `config.yaml`.
+found`.
+
+`setup-hermes` writes a `model` block — `provider: custom`,
+`api_mode: chat_completions`, the gateway's `/v1` as `base_url`, the chosen
+model as `default` with its `context_length` from the live catalog — and puts
+the key in directly as a **literal `api_key`**. Hermes documents a literal
+there; its `${VAR}` form expands only from the process environment, never
+from `~/.hermes/.env` alone, so a placeholder would be sent verbatim and get
+a 401. The file is written mode 0600. A fresh install ships `model: ""` (the
+"not configured" sentinel); replacing it is what lets a headless first run
+skip the wizard. Every other key in the file is left as it was.
 
 A running `hermes gateway` needs a restart to pick the change up.
-`--profile <name>` adds a `providers.freellmapi-<name>` entry instead —
-picked inside a chat with `/model custom:freellmapi-<name>:auto` — and leaves
-the default model alone; `--model <id>` pins the default. Hermes sends a bare
-SDK user agent to custom endpoints, so the block carries
-`default_headers: { User-Agent: hermes-agent }`, which is what the Agents
-page's "seen recently" badge keys on. `HERMES_HOME` is honoured when set.
+
+#### Verify
+
+- `hermes -z "Say hello"` returns a reply — end-to-end proof (server,
+  key, and model all work).
+- In the TUI the gateway is the default model, shown as `custom/<model-id>`;
+  `/model custom:<model-id>` picks another catalog id, and `--model <id>`
+  pins it in `config.yaml`.
+- The Agents page's "seen recently" badge keys on the block's
+  `default_headers: { User-Agent: hermes-agent }` — hermes otherwise sends a
+  bare SDK user agent to custom endpoints.
+- `--profile <name>` adds a `providers.freellmapi-<name>` entry instead —
+  picked inside a chat with `/model custom:freellmapi-<name>:auto` — and
+  leaves the default model alone. `HERMES_HOME` is honoured when set.
+
+#### Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `401 Invalid API key` in `~/.hermes/logs/agent.log`, but the same key works with curl | `api_key` is a `${VAR}` placeholder — hermes expands it only from `os.environ`, never from `~/.hermes/.env` | Put the literal key in `model.api_key` (or re-run `setup-hermes`, which now writes it literally) |
+| `401` with a key that looks right | Stale key: the unified key was rotated since setup | Copy the current key from the dashboard **Keys** page, update `model.api_key` |
+| `model_not_found` | Model id must be a bare catalog id (what `GET /v1/models` returns), not `provider/name` | `/model custom:<bare-id>` |
+| `429` (≈40s cooldown) or `503` | Rate limit or missing provider key — a dashboard concern, not hermes | Check the model's provider key / rate limits on the dashboard |
+| Change not picked up | A `hermes gateway` process is still running with the old config | Restart the gateway |
 
 ### QwenPaw
 
